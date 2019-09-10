@@ -1,0 +1,26 @@
+{
+  "addons": [
+    "heroku-postgresql"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://buildpack-registry.s3.amazonaws.com/buildpacks/hashnuke/elixir.tgz"
+    }
+  ],
+  "env": {
+    "POOL_SIZE": {
+      "required": true
+    },
+    "SECRET_KEY_BASE": {
+      "required": true
+    }
+  },
+  "formation": {
+  },
+  "name": "focal-api",
+  "scripts": {
+    "postdeploy": "mix run priv/repo/seeds.exs"
+  },
+  "stack": "heroku-18",
+  "success_url": "/api/clients"
+}
