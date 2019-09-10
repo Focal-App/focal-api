@@ -10,10 +10,17 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
-## Learn more
+#### Dropping the Entire FocalAPI Database
+```
+mix ecto.drop --repo FocalApi.Repo
+mix ecto.create
+mix ecto.migrate
+mix run priv/repo/seeds.exs
+```
 
-  * Official website: http://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
+#### Dropping the Clients Table
+```
+mix ecto.rollback
+mix ecto.migrate
+mix run priv/repo/seeds.exs
+```
