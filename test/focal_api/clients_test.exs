@@ -29,7 +29,7 @@ defmodule FocalApi.ClientsTest do
       assert Clients.get_client!(client.id) == client
     end
 
-    test "get_client_by_uuid!/1 returns the client with given id" do
+    test "get_client_by_uuid!/1 returns the client with given uuid" do
       client = client_fixture()
       assert Clients.get_client_by_uuid!(client.uuid) == client
     end

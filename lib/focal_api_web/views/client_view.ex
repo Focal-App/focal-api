@@ -11,8 +11,7 @@ defmodule FocalApiWeb.ClientView do
   end
 
   def render("client.json", %{client: client}) do
-    %{id: client.id,
-      client_name: client.client_name,
+    %{client_name: client.client_name,
       uuid: client.uuid}
   end
 end

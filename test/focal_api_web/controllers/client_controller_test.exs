@@ -13,7 +13,6 @@ defmodule FocalApiWeb.ClientControllerTest do
     uuid: "7488a646-e31f-11e4-aace-600308960662"
   }
   @invalid_attrs %{client_name: nil, uuid: nil}
-  @uuid Ecto.UUID.generate()
 
   def fixture(:client) do
     {:ok, client} = Clients.create_client(@create_attrs)
@@ -39,7 +38,6 @@ defmodule FocalApiWeb.ClientControllerTest do
       conn = get(conn, Routes.client_path(conn, :show, uuid))
 
       assert %{
-               "id" => id,
                "client_name" => "some client_name",
                "uuid" => "7488a646-e31f-11e4-aace-600308960662"
              } = json_response(conn, 200)["data"]
@@ -54,14 +52,13 @@ defmodule FocalApiWeb.ClientControllerTest do
   describe "update client" do
     setup [:create_client]
 
-    test "renders client when data is valid", %{conn: conn, client: %Client{uuid: uuid} = client} do
+    test "renders client when data is valid", %{conn: conn, client: %Client{uuid: uuid} = _client} do
       conn = put(conn, Routes.client_path(conn, :update, uuid), @update_attrs)
       assert %{"uuid" => ^uuid} = json_response(conn, 200)["data"]
 
       conn = get(conn, Routes.client_path(conn, :show, uuid))
 
       assert %{
-               "id" => id,
                "client_name" => "some updated client_name",
                "uuid" => "7488a646-e31f-11e4-aace-600308960662"
              } = json_response(conn, 200)["data"]
