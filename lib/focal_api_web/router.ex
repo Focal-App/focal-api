@@ -7,10 +7,13 @@ defmodule FocalApiWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug FocalApi.Plugs.SetUser
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :fetch_session
+    plug FocalApi.Plugs.SetUser
   end
 
   scope "/api", FocalApiWeb do

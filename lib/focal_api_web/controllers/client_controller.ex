@@ -6,6 +6,8 @@ defmodule FocalApiWeb.ClientController do
 
   action_fallback FocalApiWeb.FallbackController
 
+  plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete]
+
   def index(conn, _params) do
     clients = Clients.list_clients()
     render(conn, "index.json", clients: clients)
