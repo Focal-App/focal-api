@@ -5,6 +5,9 @@
   "buildpacks": [
     {
       "url": "https://buildpack-registry.s3.amazonaws.com/buildpacks/hashnuke/elixir.tgz"
+    },
+    {
+      "url": "https://github.com/HashNuke/heroku-buildpack-elixir.git"
     }
   ],
   "env": {
@@ -13,13 +16,15 @@
     },
     "SECRET_KEY_BASE": {
       "required": true
+    },
+    "DATABASE_URL": {
+      "required": true
     }
   },
   "formation": {
   },
   "name": "focal-api",
   "scripts": {
-    "postdeploy": "mix run priv/repo/seeds.exs"
   },
   "stack": "heroku-18",
   "success_url": "/api/clients"
