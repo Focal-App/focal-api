@@ -44,8 +44,9 @@ defmodule FocalApiWeb.SessionControllerTest do
     conn = conn
     |> assign(:user, user)
     |> get("/auth/signout")
-    |> get("/api/clients")
+    |> get("/auth/google")
 
     assert conn.assigns[:user] == nil
   end
+
 end

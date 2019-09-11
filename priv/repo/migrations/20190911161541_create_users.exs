@@ -13,4 +13,8 @@ defmodule FocalApi.Repo.Migrations.CreateUsers do
     end
 
   end
+
+  def down do
+    drop_if_exists table("clients")
+  end
 end

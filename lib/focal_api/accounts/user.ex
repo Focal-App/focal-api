@@ -1,6 +1,7 @@
 defmodule FocalApi.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+  alias FocalApi.Clients.Client
 
   schema "users" do
     field :avatar, :string
@@ -8,6 +9,7 @@ defmodule FocalApi.Accounts.User do
     field :first_name, :string
     field :provider, :string
     field :uuid, Ecto.UUID
+    has_many :clients, Client
 
     timestamps()
   end
