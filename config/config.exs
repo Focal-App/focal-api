@@ -8,7 +8,8 @@
 use Mix.Config
 
 config :focal_api,
-  ecto_repos: [FocalApi.Repo]
+  ecto_repos: [FocalApi.Repo],
+  client_host: System.get_env("CLIENT_HOST")
 
 # Configures the endpoint
 config :focal_api, FocalApiWeb.Endpoint,
@@ -24,6 +25,16 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+# Configure Google OAuth:
+config :ueberauth, Ueberauth,
+  providers: [
+    google: {Ueberauth.Strategy.Google, [default_scope: "email profile plus.me"]}
+  ]
+
+config :ueberauth, Ueberauth.Strategy.Google.OAuth,
+  client_id: System.get_env("GOOGLE_CLIENT_ID"),
+  client_secret: System.get_env("GOOGLE_CLIENT_SECRET")
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
