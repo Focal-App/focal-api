@@ -13,8 +13,8 @@ defmodule FocalApiWeb.ClientController do
   plug :authorize_user_by_client_uuid when action in [:update, :delete, :show]
   plug :authorize_user_by_user_uuid when action in [:index_by_user]
 
-  def index_by_user(conn, %{"uuid" => uuid}) do
-    clients = Clients.list_clients_by_user(uuid)
+  def index_by_user(conn, %{"user_uuid" => user_uuid}) do
+    clients = Clients.list_clients_by_user(user_uuid)
     render(conn, "index.json", clients: clients)
   end
 
@@ -33,21 +33,25 @@ defmodule FocalApiWeb.ClientController do
     end
   end
 
-  def show(conn, %{"uuid" => uuid}) do
-    client = Clients.get_client_by_uuid!(uuid)
+  def show(conn, %{"client_uuid" => client_uuid}) do
+    client = Clients.get_client_by_uuid!(client_uuid)
     render(conn, "show.json", client: client)
   end
 
   def update(conn, params) do
-    client = Clients.get_client_by_uuid!(params["uuid"])
+    client_uuid = params["client_uuid"]
+    client = Clients.get_client_by_uuid!(client_uuid)
 
-    with {:ok, %Client{} = client} <- Clients.update_client(client, params) do
+    update_attrs = params
+    |> Map.put("uuid", client_uuid)
+
+    with {:ok, %Client{} = client} <- Clients.update_client(client, update_attrs) do
       render(conn, "show.json", client: client)
     end
   end
 
-  def delete(conn, %{"uuid" => uuid}) do
-    client = Clients.get_client_by_uuid!(uuid)
+  def delete(conn, %{"client_uuid" => client_uuid}) do
+    client = Clients.get_client_by_uuid!(client_uuid)
 
     with {:ok, %Client{}} <- Clients.delete_client(client) do
       send_resp(conn, :no_content, "")
@@ -55,7 +59,7 @@ defmodule FocalApiWeb.ClientController do
   end
 
   defp authorize_user_by_client_uuid(conn, _params) do
-    client = conn.params["uuid"]
+    client = conn.params["client_uuid"]
     |> Clients.get_client_by_uuid!
     |> Repo.preload(:user)
 
@@ -75,7 +79,7 @@ defmodule FocalApiWeb.ClientController do
   end
 
   defp authorize_user_by_user_uuid(conn, _params) do
-    requested_users_uuid = conn.params["uuid"]
+    requested_users_uuid = conn.params["user_uuid"]
     current_user = conn.assigns[:user]
 
     if current_user != nil && requested_users_uuid == current_user.uuid do

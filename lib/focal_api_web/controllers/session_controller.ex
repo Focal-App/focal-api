@@ -20,7 +20,7 @@ defmodule FocalApiWeb.SessionController do
         |> redirect(external: "#{@client_host}/login/#{user.uuid}")
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
-        |> put_view(RebayApiWeb.ChangesetView)
+        |> put_view(FocalApiWeb.ChangesetView)
         |> render("error.json", changeset: changeset)
     end
   end
@@ -28,7 +28,7 @@ defmodule FocalApiWeb.SessionController do
   def delete(conn, _params) do
     conn
     |> configure_session(drop: true)
-    |> redirect(external: "#{@client_host}")
+    |> Plug.Conn.send_resp(201, "No Content")
   end
 
   defp user_params(auth, provider) do

@@ -15,8 +15,13 @@ defmodule FocalApiWeb.UserController do
     end
   end
 
-  def show(conn, %{"uuid" => uuid}) do
-    user = Accounts.get_user_by_uuid!(uuid)
+  def index(conn, _params) do
+    users = Accounts.list_users
+    render(conn, "index.json", users: users)
+  end
+
+  def show(conn, %{"user_uuid" => user_uuid}) do
+    user = Accounts.get_user_by_uuid!(user_uuid)
     render(conn, "show.json", user: user)
   end
 end
