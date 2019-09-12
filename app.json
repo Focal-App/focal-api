@@ -27,5 +27,5 @@
   "scripts": {
   },
   "stack": "heroku-18",
-  "success_url": "/api/clients"
+  "success_url": "/api/users"
 }

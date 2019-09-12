@@ -7,6 +7,7 @@ defmodule FocalApi.Clients do
   alias FocalApi.Repo
 
   alias FocalApi.Clients.Client
+  alias FocalApi.Accounts
 
   @doc """
   Returns the list of clients.
@@ -19,6 +20,12 @@ defmodule FocalApi.Clients do
   """
   def list_clients do
     Repo.all(Client)
+  end
+
+  def list_clients_by_user(user_uuid) do
+    user = Accounts.get_user_by_uuid!(user_uuid)
+    query = from client in Client, where: ^user.id == client.user_id
+    Repo.all(query, preload: [:user])
   end
 
   @doc """

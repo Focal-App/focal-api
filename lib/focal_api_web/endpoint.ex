@@ -40,5 +40,6 @@ defmodule FocalApiWeb.Endpoint do
     key: "_focal_api_key",
     signing_salt: "u2/JnBqI"
 
+  plug CORSPlug, origin: ["https://focal--app.herokuapp.com", "http://localhost:3000"]
   plug FocalApiWeb.Router
 end

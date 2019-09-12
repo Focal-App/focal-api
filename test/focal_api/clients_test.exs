@@ -2,10 +2,10 @@ defmodule FocalApi.ClientsTest do
   use FocalApi.DataCase
 
   alias FocalApi.Clients
+  alias FocalApi.TestHelpers
+  alias FocalApi.Clients.Client
 
   describe "clients" do
-    alias FocalApi.Clients.Client
-
     @valid_attrs %{client_name: "some client_name", uuid: "7488a646-e31f-11e4-aace-600308960662"}
     @update_attrs %{client_name: "some updated client_name", uuid: "7488a646-e31f-11e4-aace-600308960668"}
     @invalid_attrs %{client_name: nil, uuid: nil}
@@ -24,12 +24,22 @@ defmodule FocalApi.ClientsTest do
       assert Clients.list_clients() == [client]
     end
 
+    test "list_clients_by_user/1 returns all clients by user" do
+      user = TestHelpers.user_fixture()
+      user2 = TestHelpers.user_fixture()
+      client1 = TestHelpers.client_fixture(%{ user_id: user.id })
+      _client2 = TestHelpers.client_fixture(%{ user_id: user2.id })
+      client3 = TestHelpers.client_fixture(%{ user_id: user.id })
+
+      assert Clients.list_clients_by_user(user.uuid) == [client1, client3]
+    end
+
     test "get_client!/1 returns the client with given id" do
       client = client_fixture()
       assert Clients.get_client!(client.id) == client
     end
 
-    test "get_client_by_uuid!/1 returns the client with given id" do
+    test "get_client_by_uuid!/1 returns the client with given uuid" do
       client = client_fixture()
       assert Clients.get_client_by_uuid!(client.uuid) == client
     end
