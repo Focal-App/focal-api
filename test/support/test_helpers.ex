@@ -4,6 +4,7 @@ defmodule FocalApi.TestHelpers do
   alias FocalApi.Repo
   alias FocalApi.Accounts.User
   alias FocalApi.Clients.Client
+  alias FocalApi.Clients.Package
 
   def user_fixture(attrs \\ %{}) do
     params =
@@ -39,6 +40,24 @@ defmodule FocalApi.TestHelpers do
       |> Repo.insert()
 
     client
+  end
+
+  def package_fixture(attrs \\ %{}) do
+    client = client_fixture()
+
+    params =
+      attrs
+      |> Enum.into(%{
+        package_name: "some package_name",
+        uuid: "7488a646-e31f-11e4-aace-600308960662",
+        client_id: client.id,
+      })
+
+    {:ok, package} =
+      Package.changeset(%Package{}, params)
+      |> Repo.insert()
+
+      package
   end
 
   def valid_session(conn, user) do

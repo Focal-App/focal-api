@@ -11,6 +11,7 @@
 # and so on) as they will fail if something goes wrong.
 
 alias FocalApi.Clients.Client
+alias FocalApi.Clients.Package
 alias FocalApi.Accounts.User
 alias FocalApi.Repo
 
@@ -22,12 +23,21 @@ user = %User{
   uuid: Ecto.UUID.generate(),
 }
 Repo.insert!(user)
-
 user = Repo.get_by(User, uuid: user.uuid)
 
-Repo.insert!(
-  %Client{
-    client_name: "Snow White",
-    uuid: Ecto.UUID.generate(),
-    user_id: user.id
-})
+
+client = %Client{
+  client_name: "Snow White",
+  uuid: Ecto.UUID.generate(),
+  user_id: user.id
+}
+Repo.insert!(client)
+client = Repo.get_by(Client, uuid: client.uuid)
+
+package = %Package{
+  package_name: "Engagements",
+  uuid: Ecto.UUID.generate(),
+  client_id: client.id
+}
+Repo.insert!(package)
+package = Repo.get_by(Package, uuid: package.uuid)

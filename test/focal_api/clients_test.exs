@@ -78,4 +78,70 @@ defmodule FocalApi.ClientsTest do
       assert %Ecto.Changeset{} = Clients.change_client(client)
     end
   end
+
+  describe "packages" do
+    alias FocalApi.Clients.Package
+
+    @valid_attrs %{package_name: "some package_name", uuid: "7488a646-e31f-11e4-aace-600308960662"}
+    @update_attrs %{package_name: "some updated package_name", uuid: "7488a646-e31f-11e4-aace-600308960668"}
+    @invalid_attrs %{package_name: nil, uuid: nil}
+
+    def package_fixture(attrs \\ %{}) do
+      {:ok, package} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Clients.create_package()
+
+      package
+    end
+
+    test "list_packages/0 returns all packages" do
+      package = package_fixture()
+      assert Clients.list_packages() == [package]
+    end
+
+    test "get_package!/1 returns the package with given id" do
+      package = package_fixture()
+      assert Clients.get_package!(package.id) == package
+    end
+
+    test "get_package_by_uuid!/1 returns the package with given uuid" do
+      package = package_fixture()
+      assert Clients.get_package_by_uuid!(package.uuid) == package
+    end
+
+    test "create_package/1 with valid data creates a package" do
+      assert {:ok, %Package{} = package} = Clients.create_package(@valid_attrs)
+      assert package.package_name == "some package_name"
+      assert package.uuid == "7488a646-e31f-11e4-aace-600308960662"
+    end
+
+    test "create_package/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Clients.create_package(@invalid_attrs)
+    end
+
+    test "update_package/2 with valid data updates the package" do
+      package = package_fixture()
+      assert {:ok, %Package{} = package} = Clients.update_package(package, @update_attrs)
+      assert package.package_name == "some updated package_name"
+      assert package.uuid == "7488a646-e31f-11e4-aace-600308960668"
+    end
+
+    test "update_package/2 with invalid data returns error changeset" do
+      package = package_fixture()
+      assert {:error, %Ecto.Changeset{}} = Clients.update_package(package, @invalid_attrs)
+      assert package == Clients.get_package!(package.id)
+    end
+
+    test "delete_package/1 deletes the package" do
+      package = package_fixture()
+      assert {:ok, %Package{}} = Clients.delete_package(package)
+      assert_raise Ecto.NoResultsError, fn -> Clients.get_package!(package.id) end
+    end
+
+    test "change_package/1 returns a package changeset" do
+      package = package_fixture()
+      assert %Ecto.Changeset{} = Clients.change_package(package)
+    end
+  end
 end
