@@ -24,3 +24,9 @@ mix ecto.rollback
 mix ecto.migrate
 mix run priv/repo/seeds.exs
 ```
+
+#### Resetting the Test Database after a schema change
+```
+dropdb focal_api_test
+mix ecto.migrate
+```

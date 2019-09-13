@@ -3,14 +3,12 @@ defmodule FocalApiWeb.PackageController do
 
   alias FocalApi.Clients
   alias FocalApi.Clients.Package
-  alias FocalApi.Repo
-  alias FocalApi.Accounts
 
   action_fallback FocalApiWeb.FallbackController
 
   plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index_by_client, :show]
   plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID when action in [:create, :index_by_client]
-  plug :authorize_user_by_package_uuid when action in [:update, :delete, :show]
+  plug FocalApiWeb.Plugs.AuthorizeUserByPackageUUID when action in [:update, :delete, :show]
 
   def index_by_client(conn, %{"client_uuid" => client_uuid}) do
     packages = Clients.list_packages_by_client(client_uuid)
@@ -53,26 +51,6 @@ defmodule FocalApiWeb.PackageController do
 
     with {:ok, %Package{}} <- Clients.delete_package(package) do
       send_resp(conn, :no_content, "")
-    end
-  end
-
-  defp authorize_user_by_package_uuid(conn, _params) do
-    package = conn.params["package_uuid"]
-    |> Clients.get_package_by_uuid!
-    |> Repo.preload(:client)
-
-    packages_user = Accounts.get_user!(package.client.user_id)
-
-    current_user = conn.assigns[:user]
-
-    if current_user != nil && packages_user.uuid == current_user.uuid do
-      conn
-    else
-      conn
-      |> put_status(:forbidden)
-      |> put_view(FocalApiWeb.ErrorView)
-      |> render("403.json")
-      |> halt()
     end
   end
 end

@@ -1,8 +1,6 @@
 defmodule FocalApiWeb.EventControllerTest do
   use FocalApiWeb.ConnCase
 
-  alias FocalApi.Clients
-  alias FocalApi.Clients.Event
   alias FocalApi.TestHelpers
 
   @create_attrs %{
@@ -25,9 +23,32 @@ defmodule FocalApiWeb.EventControllerTest do
     setup [:create_event]
     test "lists all events", %{conn: conn, event: event} do
       event = TestHelpers.preloaded_event(event.uuid)
+      client = TestHelpers.preloaded_client(event.client.uuid)
 
-      conn = get(conn, Routes.event_path(conn, :index_by_package, event.package.uuid))
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> get(Routes.event_path(conn, :index_by_package, event.package.uuid))
       assert length(json_response(conn, 200)["data"]) == 1
+    end
+
+    test "renders error when user is logged in but request is not authenticated", %{conn: conn, event: event} do
+      event = TestHelpers.preloaded_event(event.uuid)
+
+      conn = conn
+      |> TestHelpers.invalid_session("test_id_token")
+      |> get(Routes.event_path(conn, :index_by_package, event.package.uuid))
+
+      assert json_response(conn, 401)["errors"] != %{}
+    end
+
+    test "renders error when user is logged in but not authorized to view", %{conn: conn, event: event} do
+      event = TestHelpers.preloaded_event(event.uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(TestHelpers.user_fixture())
+      |> get(Routes.event_path(conn, :index_by_package, event.package.uuid))
+
+      assert json_response(conn, 403)["errors"] != %{}
     end
   end
 
@@ -35,10 +56,12 @@ defmodule FocalApiWeb.EventControllerTest do
     setup [:create_package]
     test "renders event when data is valid", %{conn: conn, package: package} do
       package = TestHelpers.preloaded_package(package.uuid)
-      package_client_uuid = package.client.uuid
-      package_uuid = package.uuid
+      client = TestHelpers.preloaded_client(package.client.uuid)
 
-      conn = post(conn, Routes.event_path(conn, :create, package.uuid), @create_attrs)
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> post(Routes.event_path(conn, :create, package.uuid), @create_attrs)
+
       assert %{"uuid" => uuid} = json_response(conn, 201)["data"]
 
       conn = get(conn, Routes.event_path(conn, :show, uuid))
@@ -53,20 +76,47 @@ defmodule FocalApiWeb.EventControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn, package: package} do
-      conn = post(conn, Routes.event_path(conn, :create, package.uuid), @invalid_attrs)
+      package = TestHelpers.preloaded_package(package.uuid)
+      client = TestHelpers.preloaded_client(package.client.uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> post(Routes.event_path(conn, :create, package.uuid), @invalid_attrs)
+
       assert json_response(conn, 422)["errors"] != %{}
+    end
+
+    test "renders error when user is logged in but request is not authenticated", %{conn: conn, package: package} do
+      package = TestHelpers.preloaded_package(package.uuid)
+
+      conn = conn
+      |> TestHelpers.invalid_session("test_id_token")
+      |> post(Routes.event_path(conn, :create, package.uuid), @invalid_attrs)
+
+      assert json_response(conn, 401)["errors"] != %{}
+    end
+
+    test "renders error when user is logged in but not authorized to create", %{conn: conn, package: package} do
+      conn = conn
+      |> TestHelpers.valid_session(TestHelpers.user_fixture())
+      |> post(Routes.event_path(conn, :create, package.uuid), @invalid_attrs)
+
+      assert json_response(conn, 403)["errors"] != %{}
     end
   end
 
   describe "update event" do
     setup [:create_event]
 
-    test "renders event when data is valid", %{conn: conn, event: %Event{uuid: uuid} = event} do
-      event = TestHelpers.preloaded_event(uuid)
-      client_uuid = event.client.uuid
-      package_uuid = event.package.uuid
+    test "renders event when data is valid", %{conn: conn, event: event} do
+      event = TestHelpers.preloaded_event(event.uuid)
+      uuid = event.uuid
+      client = TestHelpers.preloaded_client(event.client.uuid)
 
-      conn = put(conn, Routes.event_path(conn, :update, uuid), @update_attrs)
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> put(Routes.event_path(conn, :update, uuid), @update_attrs)
+
       assert %{"uuid" => ^uuid} = json_response(conn, 200)["data"]
 
       conn = get(conn, Routes.event_path(conn, :show, uuid))
@@ -81,8 +131,34 @@ defmodule FocalApiWeb.EventControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn, event: event} do
-      conn = put(conn, Routes.event_path(conn, :update, event.uuid), @invalid_attrs)
+      event = TestHelpers.preloaded_event(event.uuid)
+      client = TestHelpers.preloaded_client(event.client.uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> put(Routes.event_path(conn, :update, event.uuid), @invalid_attrs)
+
       assert json_response(conn, 422)["errors"] != %{}
+    end
+
+    test "renders error when user is logged in but request is not authenticated", %{conn: conn, event: event} do
+      event = TestHelpers.preloaded_event(event.uuid)
+
+      conn = conn
+      |> TestHelpers.invalid_session("test_id_token")
+      |> put(Routes.event_path(conn, :update, event.uuid), @invalid_attrs)
+
+      assert json_response(conn, 401)["errors"] != %{}
+    end
+
+    test "renders error when user is logged in but not authorized to update", %{conn: conn, event: event} do
+      event = TestHelpers.preloaded_event(event.uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(TestHelpers.user_fixture())
+      |> put(Routes.event_path(conn, :update, event.uuid), @invalid_attrs)
+
+      assert json_response(conn, 403)["errors"] != %{}
     end
   end
 
@@ -90,12 +166,38 @@ defmodule FocalApiWeb.EventControllerTest do
     setup [:create_event]
 
     test "deletes chosen event", %{conn: conn, event: event} do
-      conn = delete(conn, Routes.event_path(conn, :delete, event.uuid))
+      event = TestHelpers.preloaded_event(event.uuid)
+      client = TestHelpers.preloaded_client(event.client.uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> delete(Routes.event_path(conn, :delete, event.uuid))
+
       assert response(conn, 204)
 
       assert_error_sent 404, fn ->
         get(conn, Routes.event_path(conn, :show, event.uuid))
       end
+    end
+
+    test "renders error when user is logged in but request is not authenticated", %{conn: conn, event: event} do
+      event = TestHelpers.preloaded_event(event.uuid)
+
+      conn = conn
+      |> TestHelpers.invalid_session("test_id_token")
+      |> delete(Routes.event_path(conn, :delete, event.uuid))
+
+      assert json_response(conn, 401)["errors"] != %{}
+    end
+
+    test "renders error when user is logged in but not authorized to delete", %{conn: conn, event: event} do
+      event = TestHelpers.preloaded_event(event.uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(TestHelpers.user_fixture())
+      |> delete(Routes.event_path(conn, :delete, event.uuid))
+
+      assert json_response(conn, 403)["errors"] != %{}
     end
   end
 
@@ -107,10 +209,5 @@ defmodule FocalApiWeb.EventControllerTest do
   defp create_event(_) do
     event = TestHelpers.event_fixture()
     {:ok, event: event}
-  end
-
-  defp create_client(_) do
-    client = TestHelpers.client_fixture()
-    {:ok, client: client}
   end
 end
