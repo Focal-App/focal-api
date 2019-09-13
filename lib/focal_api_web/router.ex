@@ -19,10 +19,17 @@ defmodule FocalApiWeb.Router do
   scope "/api", FocalApiWeb do
     pipe_through :api
 
-    resources "/clients", ClientController, only: [:show, :create, :update, :delete], param: "client_uuid"
-    resources "/clients/:client_uuid/packages", PackageController, except: [:new, :edit], param: "package_uuid"
-    resources "/users", UserController, only: [:show, :index, :create], param: "user_uuid"
-    get "/users/:user_uuid/clients", ClientController, :index_by_user
+    get "/client/:client_uuid/packages", PackageController, :index_by_client
+    post "/client/:client_uuid/package", PackageController, :create
+    get "/package/:package_uuid", PackageController, :show
+    put "/package/:package_uuid", PackageController, :update
+    delete "/package/:package_uuid", PackageController, :delete
+
+    get "/user/:user_uuid/clients", ClientController, :index_by_user
+    resources "/client", ClientController, only: [:show, :create, :update, :delete], param: "client_uuid"
+
+    get "/users", UserController, :index
+    resources "/user", UserController, only: [:show, :create], param: "user_uuid"
   end
 
   scope "/auth", FocalApiWeb do

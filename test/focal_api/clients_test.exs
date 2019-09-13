@@ -100,6 +100,17 @@ defmodule FocalApi.ClientsTest do
       assert Clients.list_packages() == [package]
     end
 
+    test "list_packages_by_client/1 returns all packages for a client" do
+      client1 = TestHelpers.client_fixture()
+      client2 = TestHelpers.client_fixture()
+
+      package1 = package_fixture(%{ client_id: client1.id })
+      _package2 = package_fixture(%{ client_id: client2.id })
+      package3 = package_fixture(%{ client_id: client1.id })
+
+      assert Clients.list_packages_by_client(client1.uuid) == [package1, package3]
+    end
+
     test "get_package!/1 returns the package with given id" do
       package = package_fixture()
       assert Clients.get_package!(package.id) == package

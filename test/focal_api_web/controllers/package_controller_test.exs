@@ -18,7 +18,7 @@ defmodule FocalApiWeb.PackageControllerTest do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
-  describe "index" do
+  describe "index_by_client" do
     setup [:create_package]
     test "lists all packages", %{conn: conn, package: package} do
       package = TestHelpers.preloaded_package(package.uuid)
@@ -26,7 +26,7 @@ defmodule FocalApiWeb.PackageControllerTest do
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
-      |> get(Routes.package_path(conn, :index, client.uuid))
+      |> get(Routes.package_path(conn, :index_by_client, client.uuid))
 
       assert length(json_response(conn, 200)["data"]) == 1
     end
@@ -37,7 +37,7 @@ defmodule FocalApiWeb.PackageControllerTest do
 
       conn = conn
       |> TestHelpers.invalid_session("test_id_token")
-      |> get(Routes.package_path(conn, :index, client.uuid))
+      |> get(Routes.package_path(conn, :index_by_client, client.uuid))
 
       assert json_response(conn, 401)["errors"] != %{}
     end
@@ -48,7 +48,7 @@ defmodule FocalApiWeb.PackageControllerTest do
 
       conn = conn
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
-      |> get(Routes.package_path(conn, :index, client.uuid))
+      |> get(Routes.package_path(conn, :index_by_client, client.uuid))
 
       assert json_response(conn, 403)["errors"] != %{}
     end
@@ -63,29 +63,27 @@ defmodule FocalApiWeb.PackageControllerTest do
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
-      |> get(Routes.package_path(conn, :show, client.uuid, package.uuid))
+      |> get(Routes.package_path(conn, :show, package.uuid))
 
       assert response(conn, 200)
     end
 
     test "renders error when user is logged in but request is not authenticated", %{conn: conn, package: package} do
       package = TestHelpers.preloaded_package(package.uuid)
-      client = TestHelpers.preloaded_client(package.client.uuid)
 
       conn = conn
       |> TestHelpers.invalid_session("test_id_token")
-      |> get(Routes.package_path(conn, :show, client.uuid, package.uuid))
+      |> get(Routes.package_path(conn, :show, package.uuid))
 
       assert json_response(conn, 401)["errors"] != %{}
     end
 
     test "renders error when user is logged in but not authorized to view", %{conn: conn, package: package} do
       package = TestHelpers.preloaded_package(package.uuid)
-      client = TestHelpers.preloaded_client(package.client.uuid)
 
       conn = conn
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
-      |> get(Routes.package_path(conn, :show, client.uuid, package.uuid))
+      |> get(Routes.package_path(conn, :show, package.uuid))
 
       assert json_response(conn, 403)["errors"] != %{}
     end
@@ -99,11 +97,11 @@ defmodule FocalApiWeb.PackageControllerTest do
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
-      |> post(Routes.package_path(conn, :create, client_uuid), @create_attrs)
+      |> post(Routes.package_path(conn, :create, client.uuid), @create_attrs)
 
       assert %{"uuid" => uuid} = json_response(conn, 201)["data"]
 
-      conn = get(conn, Routes.package_path(conn, :show, client.uuid, uuid))
+      conn = get(conn, Routes.package_path(conn, :show, uuid))
 
       assert %{
                "package_name" => "some package_name",
@@ -118,7 +116,8 @@ defmodule FocalApiWeb.PackageControllerTest do
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
-      |>  post(Routes.package_path(conn, :create, client.uuid), @invalid_attrs)
+      |> post(Routes.package_path(conn, :create, client.uuid), @invalid_attrs)
+
       assert json_response(conn, 422)["errors"] != %{}
     end
 
@@ -155,11 +154,11 @@ defmodule FocalApiWeb.PackageControllerTest do
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
-      |> put(Routes.package_path(conn, :update, package_client_uuid, package.uuid), @update_attrs)
+      |> put(Routes.package_path(conn, :update, package.uuid), @update_attrs)
 
       assert %{"uuid" => ^uuid} = json_response(conn, 200)["data"]
 
-      conn = get(conn, Routes.package_path(conn, :show, package_client_uuid, uuid))
+      conn = get(conn, Routes.package_path(conn, :show, uuid))
 
       assert %{
                "package_name" => "some updated package_name",
@@ -175,29 +174,27 @@ defmodule FocalApiWeb.PackageControllerTest do
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
-      |> put(Routes.package_path(conn, :update, package_client_uuid, package.uuid), @invalid_attrs)
+      |> put(Routes.package_path(conn, :update, package.uuid), @invalid_attrs)
 
       assert json_response(conn, 422)["errors"] != %{}
     end
 
     test "renders error when user is logged in but request is not authenticated", %{conn: conn, package: package} do
       package = TestHelpers.preloaded_package(package.uuid)
-      package_client_uuid = package.client.uuid
 
       conn = conn
       |> TestHelpers.invalid_session("test_id_token")
-      |> put(Routes.package_path(conn, :update, package_client_uuid, package.uuid), @invalid_attrs)
+      |> put(Routes.package_path(conn, :update, package.uuid), @invalid_attrs)
 
       assert json_response(conn, 401)["errors"] != %{}
     end
 
     test "renders error when user is logged in but not authorized to update", %{conn: conn, package: package} do
       package = TestHelpers.preloaded_package(package.uuid)
-      package_client_uuid = package.client.uuid
 
       conn = conn
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
-      |> put(Routes.package_path(conn, :update, package_client_uuid, package.uuid), @invalid_attrs)
+      |> put(Routes.package_path(conn, :update, package.uuid), @invalid_attrs)
 
       assert json_response(conn, 403)["errors"] != %{}
     end
@@ -213,33 +210,31 @@ defmodule FocalApiWeb.PackageControllerTest do
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
-      |> delete(Routes.package_path(conn, :delete, package_client_uuid, package.uuid))
+      |> delete(Routes.package_path(conn, :delete, package.uuid))
 
       assert response(conn, 204)
 
       assert_error_sent 404, fn ->
-        get(conn, Routes.package_path(conn, :show, package_client_uuid, package.uuid))
+        get(conn, Routes.package_path(conn, :show, package.uuid))
       end
     end
 
     test "renders error when user is logged in but request is not authenticated", %{conn: conn, package: package} do
       package = TestHelpers.preloaded_package(package.uuid)
-      package_client_uuid = package.client.uuid
 
       conn = conn
       |> TestHelpers.invalid_session("test_id_token")
-      |> delete(Routes.package_path(conn, :delete, package_client_uuid, package.uuid))
+      |> delete(Routes.package_path(conn, :delete, package.uuid))
 
       assert json_response(conn, 401)["errors"] != %{}
     end
 
     test "renders error when user is logged in but not authorized to delete", %{conn: conn, package: package} do
       package = TestHelpers.preloaded_package(package.uuid)
-      package_client_uuid = package.client.uuid
 
       conn = conn
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
-      |> delete(Routes.package_path(conn, :delete, package_client_uuid, package.uuid))
+      |> delete(Routes.package_path(conn, :delete, package.uuid))
 
       assert json_response(conn, 403)["errors"] != %{}
     end

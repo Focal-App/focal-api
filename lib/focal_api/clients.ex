@@ -126,6 +126,12 @@ defmodule FocalApi.Clients do
     Repo.all(Package)
   end
 
+  def list_packages_by_client(client_uuid) do
+    client = get_client_by_uuid!(client_uuid)
+    query = from package in Package, where: ^client.id == package.client_id
+    Repo.all(query, preload: [:client])
+  end
+
   @doc """
   Gets a single package.
 
