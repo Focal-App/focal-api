@@ -3,19 +3,21 @@ defmodule FocalApiWeb.ClientController do
 
   alias FocalApi.Clients
   alias FocalApi.Clients.Client
-  alias FocalApi.Accounts
-  alias FocalApi.Repo
-
 
   action_fallback FocalApiWeb.FallbackController
 
-  plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index_by_user, :show]
-  plug :authorize_user_by_client_uuid when action in [:update, :delete, :show]
+  plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index_by_user, :show, :show_all_client_data]
+  plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID when action in [:update, :delete, :show, :show_all_client_data]
   plug :authorize_user_by_user_uuid when action in [:index_by_user]
 
   def index_by_user(conn, %{"user_uuid" => user_uuid}) do
     clients = Clients.list_clients_by_user(user_uuid)
     render(conn, "index.json", clients: clients)
+  end
+
+  def index_of_all_client_data_by_user(conn, %{"user_uuid" => user_uuid}) do
+    clients = Clients.list_clients_by_user(user_uuid)
+    render(conn, "index_of_all_client_data.json", clients: clients)
   end
 
   def create(conn, params) do
@@ -38,6 +40,11 @@ defmodule FocalApiWeb.ClientController do
     render(conn, "show.json", client: client)
   end
 
+  def show_all_client_data(conn, %{"client_uuid" => client_uuid}) do
+    client = Clients.get_client_by_uuid!(client_uuid)
+    render(conn, "show_all_client_data.json", client: client)
+  end
+
   def update(conn, params) do
     client_uuid = params["client_uuid"]
     client = Clients.get_client_by_uuid!(client_uuid)
@@ -55,26 +62,6 @@ defmodule FocalApiWeb.ClientController do
 
     with {:ok, %Client{}} <- Clients.delete_client(client) do
       send_resp(conn, :no_content, "")
-    end
-  end
-
-  defp authorize_user_by_client_uuid(conn, _params) do
-    client = conn.params["client_uuid"]
-    |> Clients.get_client_by_uuid!
-    |> Repo.preload(:user)
-
-    clients_user = Accounts.get_user!(client.user_id)
-
-    current_user = conn.assigns[:user]
-
-    if current_user != nil && clients_user.uuid == current_user.uuid do
-      conn
-    else
-      conn
-      |> put_status(:forbidden)
-      |> put_view(FocalApiWeb.ErrorView)
-      |> render("403.json")
-      |> halt()
     end
   end
 

@@ -24,3 +24,27 @@ mix ecto.rollback
 mix ecto.migrate
 mix run priv/repo/seeds.exs
 ```
+
+#### Resetting the Test Database after a schema change
+```
+dropdb focal_api_test
+mix ecto.migrate
+```
+#### Deploying to Heroku from CLI
+```
+git push heroku <branch_name>:master
+```
+
+## Setting up Environment Variables + Starting Local Server
+-  Create a .env file in your root and add the following
+```
+export GOOGLE_CLIENT_ID="Get from Teammate"
+export GOOGLE_CLIENT_SECRET="Get from Teammate"
+export CLIENT_HOST=http://localhost:<client_port>
+```
+- `source .env`
+- `mix phx.server`
+
+## Running Tests
+- `source .env`
+- `mix test`
