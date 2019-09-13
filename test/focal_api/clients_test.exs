@@ -155,4 +155,83 @@ defmodule FocalApi.ClientsTest do
       assert %Ecto.Changeset{} = Clients.change_package(package)
     end
   end
+
+  describe "events" do
+    alias FocalApi.Clients.Event
+
+    @valid_attrs %{event_name: "some event_name", shoot_date: "2010-04-17T14:00:00Z", uuid: "7488a646-e31f-11e4-aace-600308960662"}
+    @update_attrs %{event_name: "some updated event_name", shoot_date: "2011-05-18T15:01:01Z", uuid: "7488a646-e31f-11e4-aace-600308960668"}
+    @invalid_attrs %{event_name: nil, shoot_date: nil, uuid: nil}
+
+    def event_fixture(attrs \\ %{}) do
+      {:ok, event} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Clients.create_event()
+
+      event
+    end
+
+    test "list_events/0 returns all events" do
+      event = event_fixture()
+      assert Clients.list_events() == [event]
+    end
+
+    test "list_events_by_package/1 returns all packages for a event" do
+      package1 = TestHelpers.package_fixture()
+      package2 = TestHelpers.package_fixture()
+
+      event1 = event_fixture(%{ package_id: package1.id })
+      _event2 = event_fixture(%{ package_id: package2.id })
+      event3 = event_fixture(%{ package_id: package1.id })
+
+      assert Clients.list_events_by_package(package1.uuid) == [event1, event3]
+    end
+
+    test "get_event!/1 returns the event with given id" do
+      event = event_fixture()
+      assert Clients.get_event!(event.id) == event
+    end
+
+    test "get_event_by_uuid!/1 returns the event with given uuid" do
+      event = event_fixture()
+      assert Clients.get_event_by_uuid!(event.uuid) == event
+    end
+
+    test "create_event/1 with valid data creates a event" do
+      assert {:ok, %Event{} = event} = Clients.create_event(@valid_attrs)
+      assert event.event_name == "some event_name"
+      assert event.shoot_date == DateTime.from_naive!(~N[2010-04-17T14:00:00Z], "Etc/UTC")
+      assert event.uuid == "7488a646-e31f-11e4-aace-600308960662"
+    end
+
+    test "create_event/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Clients.create_event(@invalid_attrs)
+    end
+
+    test "update_event/2 with valid data updates the event" do
+      event = event_fixture()
+      assert {:ok, %Event{} = event} = Clients.update_event(event, @update_attrs)
+      assert event.event_name == "some updated event_name"
+      assert event.shoot_date == DateTime.from_naive!(~N[2011-05-18T15:01:01Z], "Etc/UTC")
+      assert event.uuid == "7488a646-e31f-11e4-aace-600308960668"
+    end
+
+    test "update_event/2 with invalid data returns error changeset" do
+      event = event_fixture()
+      assert {:error, %Ecto.Changeset{}} = Clients.update_event(event, @invalid_attrs)
+      assert event == Clients.get_event!(event.id)
+    end
+
+    test "delete_event/1 deletes the event" do
+      event = event_fixture()
+      assert {:ok, %Event{}} = Clients.delete_event(event)
+      assert_raise Ecto.NoResultsError, fn -> Clients.get_event!(event.id) end
+    end
+
+    test "change_event/1 returns a event changeset" do
+      event = event_fixture()
+      assert %Ecto.Changeset{} = Clients.change_event(event)
+    end
+  end
 end
