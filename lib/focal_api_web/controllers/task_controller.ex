@@ -3,8 +3,13 @@ defmodule FocalApiWeb.TaskController do
 
   alias FocalApi.Clients
   alias FocalApi.Clients.Task
+  alias FocalApi.Accounts
+  alias FocalApi.Repo
 
   action_fallback FocalApiWeb.FallbackController
+  plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index_by_client, :show]
+  plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID when action in [:index_by_client, :create]
+  plug :authorize_user_by_task_uuid when action in [:update, :delete, :show]
 
   def index_by_client(conn, _params) do
     tasks = Clients.list_tasks_by_client(conn.params["client_uuid"])
@@ -57,6 +62,26 @@ defmodule FocalApiWeb.TaskController do
 
     with {:ok, %Task{}} <- Clients.delete_task(task) do
       send_resp(conn, :no_content, "")
+    end
+  end
+
+  defp authorize_user_by_task_uuid(conn, _params) do
+    task = conn.params["task_uuid"]
+    |> Clients.get_task_by_uuid!
+    |> Repo.preload(:client)
+
+    tasks_user = Accounts.get_user!(task.client.user_id)
+
+    current_user = conn.assigns[:user]
+
+    if current_user != nil && tasks_user.uuid == current_user.uuid do
+      conn
+    else
+      conn
+      |> put_status(:forbidden)
+      |> put_view(FocalApiWeb.ErrorView)
+      |> render("403.json")
+      |> halt()
     end
   end
 end
