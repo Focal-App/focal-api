@@ -1,7 +1,8 @@
 defmodule FocalApiWeb.TaskView do
   use FocalApiWeb, :view
+
   alias FocalApiWeb.TaskView
-  alias FocalApi.TestHelpers
+  alias FocalApi.Clients
 
   def render("index.json", %{tasks: tasks}) do
     %{data: render_many(tasks, TaskView, "task.json")}
@@ -12,14 +13,15 @@ defmodule FocalApiWeb.TaskView do
   end
 
   def render("task.json", %{task: task}) do
-    task = TestHelpers.preloaded_task(task.uuid)
-    event_uuid = if (is_nil(task.event)), do: nil, else: task.event.uuid
+    client = Clients.get_client!(task.client_id)
+    event = Clients.get_event(task.event_id)
+    event_uuid = if (is_nil(event)), do: nil, else: event.uuid
     %{
       uuid: task.uuid,
       category: task.category,
       step: task.step,
       is_completed: task.is_completed,
-      client_uuid: task.client.uuid,
+      client_uuid: client.uuid,
       event_uuid: event_uuid
     }
   end

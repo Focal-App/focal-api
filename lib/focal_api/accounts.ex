@@ -39,6 +39,8 @@ defmodule FocalApi.Accounts do
 
   def get_user_by_uuid!(uuid), do: Repo.get_by!(User, uuid: uuid)
 
+  def get_user_by_email(email), do: Repo.get_by(User, email: email)
+
   @doc """
   Creates a user.
 

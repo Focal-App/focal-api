@@ -1,7 +1,7 @@
 defmodule FocalApiWeb.EventView do
   use FocalApiWeb, :view
   alias FocalApiWeb.EventView
-  alias FocalApi.TestHelpers
+  alias FocalApi.Clients
 
   def render("index.json", %{events: events}) do
     %{data: render_many(events, EventView, "event.json")}
@@ -12,13 +12,14 @@ defmodule FocalApiWeb.EventView do
   end
 
   def render("event.json", %{event: event}) do
-    event = TestHelpers.preloaded_event(event.uuid)
+    client = Clients.get_client!(event.client_id)
+    package = Clients.get_package!(event.package_id)
     %{
       event_name: event.event_name,
       shoot_date: event.shoot_date,
       uuid: event.uuid,
-      package_uuid: event.package.uuid,
-      client_uuid: event.client.uuid
+      package_uuid: package.uuid,
+      client_uuid: client.uuid
     }
   end
 end

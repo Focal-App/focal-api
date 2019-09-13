@@ -88,6 +88,14 @@ defmodule FocalApi.Clients do
 
   def get_event!(id), do: Repo.get!(Event, id)
 
+  def get_event(id) do
+    id
+    |> gracefully_handle_id_get
+  end
+
+  defp gracefully_handle_id_get(nil), do: nil
+  defp gracefully_handle_id_get(id), do: Repo.get_by(Event, id: id)
+
   def get_event_by_uuid!(uuid), do: Repo.get_by!(Event, uuid: uuid)
 
   def get_event_by_uuid(event_uuid) do

@@ -15,6 +15,11 @@ defmodule FocalApiWeb.ClientController do
     render(conn, "index.json", clients: clients)
   end
 
+  def index_of_all_client_data_by_user(conn, %{"user_uuid" => user_uuid}) do
+    clients = Clients.list_clients_by_user(user_uuid)
+    render(conn, "index_of_all_client_data.json", clients: clients)
+  end
+
   def create(conn, params) do
     current_user = conn.assigns[:user]
 
