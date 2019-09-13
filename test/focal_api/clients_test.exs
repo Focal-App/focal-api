@@ -234,4 +234,91 @@ defmodule FocalApi.ClientsTest do
       assert %Ecto.Changeset{} = Clients.change_event(event)
     end
   end
+
+  describe "tasks" do
+    alias FocalApi.Clients.Task
+
+    @valid_attrs %{category: "some category", is_completed: true, step: "some step", uuid: "7488a646-e31f-11e4-aace-600308960662"}
+    @update_attrs %{category: "some updated category", is_completed: false, step: "some updated step", uuid: "7488a646-e31f-11e4-aace-600308960668"}
+    @invalid_attrs %{category: nil, is_completed: nil, step: nil, uuid: nil}
+
+    def task_fixture(attrs \\ %{}) do
+      {:ok, task} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Clients.create_task()
+
+      task
+    end
+
+    test "list_tasks/0 returns all tasks" do
+      task = task_fixture()
+      assert Clients.list_tasks() == [task]
+    end
+
+    test "list_tasks_by_event/1 returns all tasks for a event" do
+      event1 = TestHelpers.event_fixture()
+      event2 = TestHelpers.event_fixture()
+
+      task1 = task_fixture(%{ event_id: event1.id })
+      _task2 = task_fixture(%{ event_id: event2.id })
+      task3 = task_fixture(%{ event_id: event1.id })
+
+      assert Clients.list_tasks_by_event(event1.uuid) == [task1, task3]
+    end
+
+    test "list_tasks_by_client/1 returns all tasks for a client" do
+      client1 = TestHelpers.client_fixture()
+      client2 = TestHelpers.client_fixture()
+
+      task1 = task_fixture(%{ client_id: client1.id })
+      _task2 = task_fixture(%{ client_id: client2.id })
+      task3 = task_fixture(%{ client_id: client1.id })
+
+      assert Clients.list_tasks_by_client(client1.uuid) == [task1, task3]
+    end
+
+    test "get_task!/1 returns the task with given id" do
+      task = task_fixture()
+      assert Clients.get_task!(task.id) == task
+    end
+
+    test "create_task/1 with valid data creates a task" do
+      assert {:ok, %Task{} = task} = Clients.create_task(@valid_attrs)
+      assert task.category == "some category"
+      assert task.is_completed == true
+      assert task.step == "some step"
+      assert task.uuid == "7488a646-e31f-11e4-aace-600308960662"
+    end
+
+    test "create_task/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Clients.create_task(@invalid_attrs)
+    end
+
+    test "update_task/2 with valid data updates the task" do
+      task = task_fixture()
+      assert {:ok, %Task{} = task} = Clients.update_task(task, @update_attrs)
+      assert task.category == "some updated category"
+      assert task.is_completed == false
+      assert task.step == "some updated step"
+      assert task.uuid == "7488a646-e31f-11e4-aace-600308960668"
+    end
+
+    test "update_task/2 with invalid data returns error changeset" do
+      task = task_fixture()
+      assert {:error, %Ecto.Changeset{}} = Clients.update_task(task, @invalid_attrs)
+      assert task == Clients.get_task!(task.id)
+    end
+
+    test "delete_task/1 deletes the task" do
+      task = task_fixture()
+      assert {:ok, %Task{}} = Clients.delete_task(task)
+      assert_raise Ecto.NoResultsError, fn -> Clients.get_task!(task.id) end
+    end
+
+    test "change_task/1 returns a task changeset" do
+      task = task_fixture()
+      assert %Ecto.Changeset{} = Clients.change_task(task)
+    end
+  end
 end

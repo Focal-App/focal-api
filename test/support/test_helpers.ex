@@ -7,6 +7,7 @@ defmodule FocalApi.TestHelpers do
   alias FocalApi.Clients
   alias FocalApi.Clients.Package
   alias FocalApi.Clients.Event
+  alias FocalApi.Clients.Task
 
   def user_fixture(attrs \\ %{}) do
     params =
@@ -83,6 +84,28 @@ defmodule FocalApi.TestHelpers do
       event
   end
 
+  def task_fixture(attrs \\ %{}) do
+    client = client_fixture()
+    event = event_fixture(%{ client_id: client.id })
+
+    params =
+      attrs
+      |> Enum.into(%{
+        category: "some category",
+        is_completed: true,
+        step: "some step",
+        uuid: Ecto.UUID.generate(),
+        client_id: client.id,
+        event_id: event.id
+      })
+
+    {:ok, task} =
+      Task.changeset(%Task{}, params)
+      |> Repo.insert()
+
+      task
+  end
+
   def valid_session(conn, user) do
     conn
     |> assign(:user, user)
@@ -112,5 +135,12 @@ defmodule FocalApi.TestHelpers do
     |> Clients.get_event_by_uuid!
     |> Repo.preload(:client)
     |> Repo.preload(:package)
+  end
+
+  def preloaded_task(uuid) do
+    uuid
+    |> Clients.get_task_by_uuid!
+    |> Repo.preload(:client)
+    |> Repo.preload(:event)
   end
 end
