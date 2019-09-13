@@ -4,6 +4,7 @@ defmodule FocalApi.TestHelpers do
   alias FocalApi.Repo
   alias FocalApi.Accounts.User
   alias FocalApi.Clients.Client
+  alias FocalApi.Clients
   alias FocalApi.Clients.Package
 
   def user_fixture(attrs \\ %{}) do
@@ -70,5 +71,17 @@ defmodule FocalApi.TestHelpers do
 
   def invalid_session(conn, id_token) do
     init_test_session(conn, id: id_token)
+  end
+
+  def preloaded_package(uuid) do
+    uuid
+    |> Clients.get_package_by_uuid!
+    |> Repo.preload(:client)
+  end
+
+  def preloaded_client(uuid) do
+    uuid
+    |> Clients.get_client_by_uuid!
+    |> Repo.preload(:user)
   end
 end

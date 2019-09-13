@@ -1,10 +1,8 @@
 defmodule FocalApiWeb.ClientControllerTest do
   use FocalApiWeb.ConnCase
 
-  alias FocalApi.Clients
   alias FocalApi.Clients.Client
   alias FocalApi.TestHelpers
-  alias FocalApi.Repo
 
   @create_attrs %{
     client_name: "some client_name",
@@ -24,7 +22,7 @@ defmodule FocalApiWeb.ClientControllerTest do
     setup [:create_client, :create_user]
 
     test "shows chosen client", %{conn: conn, client: client} do
-      client = preloaded_client(client.uuid)
+      client = TestHelpers.preloaded_client(client.uuid)
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
@@ -76,7 +74,7 @@ defmodule FocalApiWeb.ClientControllerTest do
 
       assert %{"uuid" => uuid} = json_response(conn, 201)["data"]
 
-      client = preloaded_client(uuid)
+      client = TestHelpers.preloaded_client(uuid)
 
       assert client.user == user
     end
@@ -108,7 +106,7 @@ defmodule FocalApiWeb.ClientControllerTest do
     setup [:create_client, :create_user]
 
     test "renders client when data is valid", %{conn: conn, client: %Client{uuid: uuid} = _client} do
-      client = preloaded_client(uuid)
+      client = TestHelpers.preloaded_client(uuid)
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
@@ -126,7 +124,7 @@ defmodule FocalApiWeb.ClientControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn, client: client} do
-      client = preloaded_client(client.uuid)
+      client = TestHelpers.preloaded_client(client.uuid)
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
@@ -157,7 +155,7 @@ defmodule FocalApiWeb.ClientControllerTest do
     setup [:create_client, :create_user]
 
     test "deletes chosen client", %{conn: conn, client: client} do
-      client = preloaded_client(client.uuid)
+      client = TestHelpers.preloaded_client(client.uuid)
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
@@ -190,7 +188,7 @@ defmodule FocalApiWeb.ClientControllerTest do
   describe "index_by_user" do
     setup [:create_client, :create_user]
     test "lists all clients for a user", %{conn: conn, client: client} do
-      client = preloaded_client(client.uuid)
+      client = TestHelpers.preloaded_client(client.uuid)
       user_uuid = client.user.uuid
 
       conn = conn
@@ -213,7 +211,7 @@ defmodule FocalApiWeb.ClientControllerTest do
     end
 
     test "renders error when user is logged in but not authorized to make the change", %{conn: conn, client: client, user: user} do
-      client = preloaded_client(client.uuid)
+      client = TestHelpers.preloaded_client(client.uuid)
       user_uuid = client.user.uuid
 
       conn = conn
@@ -226,20 +224,12 @@ defmodule FocalApiWeb.ClientControllerTest do
 
 
   defp create_client(_) do
-    user = TestHelpers.user_fixture()
-    client = TestHelpers.client_fixture(%{ user_id: user.id })
-
+    client = TestHelpers.client_fixture()
     {:ok, client: client}
   end
 
   defp create_user(_) do
     user = TestHelpers.user_fixture()
     {:ok, user: user}
-  end
-
-  defp preloaded_client(uuid) do
-    uuid
-    |> Clients.get_client_by_uuid!
-    |> Repo.preload(:user)
   end
 end

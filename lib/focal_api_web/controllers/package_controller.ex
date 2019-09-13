@@ -6,6 +6,9 @@ defmodule FocalApiWeb.PackageController do
 
   action_fallback FocalApiWeb.FallbackController
 
+  plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index, :show]
+  plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID when action in [:create, :update, :delete, :show, :index]
+
   def index(conn, _params) do
     packages = Clients.list_packages()
     render(conn, "index.json", packages: packages)

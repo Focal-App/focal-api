@@ -3,14 +3,11 @@ defmodule FocalApiWeb.ClientController do
 
   alias FocalApi.Clients
   alias FocalApi.Clients.Client
-  alias FocalApi.Accounts
-  alias FocalApi.Repo
-
 
   action_fallback FocalApiWeb.FallbackController
 
   plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index_by_user, :show]
-  plug :authorize_user_by_client_uuid when action in [:update, :delete, :show]
+  plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID when action in [:update, :delete, :show]
   plug :authorize_user_by_user_uuid when action in [:index_by_user]
 
   def index_by_user(conn, %{"user_uuid" => user_uuid}) do
@@ -55,26 +52,6 @@ defmodule FocalApiWeb.ClientController do
 
     with {:ok, %Client{}} <- Clients.delete_client(client) do
       send_resp(conn, :no_content, "")
-    end
-  end
-
-  defp authorize_user_by_client_uuid(conn, _params) do
-    client = conn.params["client_uuid"]
-    |> Clients.get_client_by_uuid!
-    |> Repo.preload(:user)
-
-    clients_user = Accounts.get_user!(client.user_id)
-
-    current_user = conn.assigns[:user]
-
-    if current_user != nil && clients_user.uuid == current_user.uuid do
-      conn
-    else
-      conn
-      |> put_status(:forbidden)
-      |> put_view(FocalApiWeb.ErrorView)
-      |> render("403.json")
-      |> halt()
     end
   end
 
