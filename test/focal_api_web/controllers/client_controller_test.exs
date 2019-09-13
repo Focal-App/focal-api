@@ -48,6 +48,47 @@ defmodule FocalApiWeb.ClientControllerTest do
     end
   end
 
+  describe "show_all_client_data" do
+    setup [:create_client, :create_user]
+
+    test "shows all related data for client", %{conn: conn, client: client} do
+      client = TestHelpers.preloaded_client(client.uuid)
+      package = TestHelpers.package_fixture(%{ client_id: client.id })
+      _event1 = TestHelpers.event_fixture(%{ package_id: package.id })
+      _event2 = TestHelpers.event_fixture(%{ package_id: package.id })
+      _task1 = TestHelpers.task_fixture(%{ client_id: client.id, is_completed: true })
+      _task2 = TestHelpers.task_fixture(%{ client_id: client.id, is_completed: false, event_id: nil })
+
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> get(Routes.client_path(conn, :show_all_client_data, client.uuid))
+
+      assert %{
+        "client_name" => client_name,
+        "uuid" => client_uuid,
+        "user_uuid" => user_uuid,
+        "current_stage" => current_stage,
+        "package" => package
+      } = json_response(conn, 200)["data"]
+    end
+
+    test "renders error when user is logged in but request is not authenticated", %{conn: conn, client: client, user: _user} do
+      conn = conn
+      |> TestHelpers.invalid_session("test_id_token")
+      |> get(Routes.client_path(conn, :show, client.uuid))
+
+      assert json_response(conn, 401)["errors"] != %{}
+    end
+
+    test "renders error when user is logged in but not authorized to view", %{conn: conn, client: client, user: user} do
+      conn = conn
+      |> TestHelpers.valid_session(user)
+      |> get(Routes.client_path(conn, :show, client.uuid))
+
+      assert json_response(conn, 403)["errors"] != %{}
+    end
+  end
+
   describe "create client" do
     setup [:create_user]
     test "renders client when data is valid", %{conn: conn, user: user} do

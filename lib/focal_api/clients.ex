@@ -136,6 +136,15 @@ defmodule FocalApi.Clients do
     Repo.all(query, preload: [:client])
   end
 
+  def list_first_uncompleted_task_by_client(client_uuid) do
+    client = get_client_by_uuid!(client_uuid)
+    query = from task in Task,
+              where: ^client.id == task.client_id and task.is_completed == false,
+              order_by: task.inserted_at,
+              limit: 1
+    Repo.all(query, preload: [:client])
+  end
+
   def get_task!(id), do: Repo.get!(Task, id)
 
   def get_task_by_uuid!(uuid), do: Repo.get_by!(Task, uuid: uuid)

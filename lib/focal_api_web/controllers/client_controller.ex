@@ -6,8 +6,8 @@ defmodule FocalApiWeb.ClientController do
 
   action_fallback FocalApiWeb.FallbackController
 
-  plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index_by_user, :show]
-  plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID when action in [:update, :delete, :show]
+  plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index_by_user, :show, :show_all_client_data]
+  plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID when action in [:update, :delete, :show, :show_all_client_data]
   plug :authorize_user_by_user_uuid when action in [:index_by_user]
 
   def index_by_user(conn, %{"user_uuid" => user_uuid}) do
@@ -33,6 +33,11 @@ defmodule FocalApiWeb.ClientController do
   def show(conn, %{"client_uuid" => client_uuid}) do
     client = Clients.get_client_by_uuid!(client_uuid)
     render(conn, "show.json", client: client)
+  end
+
+  def show_all_client_data(conn, %{"client_uuid" => client_uuid}) do
+    client = Clients.get_client_by_uuid!(client_uuid)
+    render(conn, "show_all_client_data.json", client: client)
   end
 
   def update(conn, params) do

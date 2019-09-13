@@ -92,7 +92,7 @@ defmodule FocalApi.TestHelpers do
       attrs
       |> Enum.into(%{
         category: "some category",
-        is_completed: true,
+        is_completed: false,
         step: "some step",
         uuid: Ecto.UUID.generate(),
         client_id: client.id,

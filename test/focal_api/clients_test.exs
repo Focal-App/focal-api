@@ -278,6 +278,15 @@ defmodule FocalApi.ClientsTest do
       assert Clients.list_tasks_by_client(client1.uuid) == [task1, task3]
     end
 
+    test "list_first_uncompleted_task_by_client/1 returns first uncomplete task for a client" do
+      client1 = TestHelpers.client_fixture()
+
+      _task1 = task_fixture(%{ client_id: client1.id, is_completed: true })
+      task2 = task_fixture(%{ client_id: client1.id, is_completed: false })
+
+      assert Clients.list_first_uncompleted_task_by_client(client1.uuid) == [task2]
+    end
+
     test "get_task!/1 returns the task with given id" do
       task = task_fixture()
       assert Clients.get_task!(task.id) == task

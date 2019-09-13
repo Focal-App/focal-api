@@ -37,6 +37,7 @@ defmodule FocalApiWeb.Router do
     put "/task/:task_uuid", TaskController, :update
     delete "/task/:task_uuid", TaskController, :delete
 
+    get "/client/:client_uuid/data", ClientController, :show_all_client_data
     get "/user/:user_uuid/clients", ClientController, :index_by_user
     resources "/client", ClientController, only: [:show, :create, :update, :delete], param: "client_uuid"
 
