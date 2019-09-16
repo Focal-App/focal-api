@@ -42,7 +42,7 @@ defmodule FocalApiWeb.TaskControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> get(Routes.task_path(conn, :index_by_client, task.client.uuid))
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to view", %{conn: conn, task: task} do
@@ -52,7 +52,7 @@ defmodule FocalApiWeb.TaskControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> get(Routes.task_path(conn, :index_by_client, task.client.uuid))
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -94,7 +94,7 @@ defmodule FocalApiWeb.TaskControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> post(Routes.task_path(conn, :create, client.uuid), @invalid_attrs)
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to create", %{conn: conn, client: client} do
@@ -104,7 +104,7 @@ defmodule FocalApiWeb.TaskControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> post(Routes.task_path(conn, :create, client.uuid), @invalid_attrs)
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -151,7 +151,7 @@ defmodule FocalApiWeb.TaskControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> put(Routes.task_path(conn, :update, task.uuid), @invalid_attrs)
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to update", %{conn: conn, task: task} do
@@ -161,7 +161,7 @@ defmodule FocalApiWeb.TaskControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> put(Routes.task_path(conn, :update, task.uuid), @invalid_attrs)
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -189,7 +189,7 @@ defmodule FocalApiWeb.TaskControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> delete(Routes.task_path(conn, :delete, task.uuid))
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to delete", %{conn: conn, task: task} do
@@ -199,7 +199,7 @@ defmodule FocalApiWeb.TaskControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> delete(Routes.task_path(conn, :delete, task.uuid))
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 

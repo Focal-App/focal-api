@@ -5,14 +5,15 @@ defmodule FocalApiWeb.ClientControllerTest do
   alias FocalApi.TestHelpers
 
   @create_attrs %{
-    client_name: "some client_name",
+    client_first_name: "some client_name",
     uuid: "7488a646-e31f-11e4-aace-600308960662",
   }
   @update_attrs %{
-    client_name: "some updated client_name",
+    client_first_name: "some updated client_name",
     uuid: "7488a646-e31f-11e4-aace-600308960662"
   }
-  @invalid_attrs %{client_name: nil, uuid: nil}
+  @invalid_attrs %{client_first_name: nil, uuid: "7488a646-e31f-11e4-aace-600308960662"}
+  @invalid_email_attrs %{client_first_name: "snow", client_email: "not an email", uuid: "7488a646-e31f-11e4-aace-600308960662"}
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
@@ -36,7 +37,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> get(Routes.client_path(conn, :show, client.uuid))
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to view", %{conn: conn, client: client, user: user} do
@@ -44,7 +45,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> TestHelpers.valid_session(user)
       |> get(Routes.client_path(conn, :show, client.uuid))
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -64,7 +65,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> get(Routes.client_path(conn, :show_all_client_data, client.uuid))
 
       assert %{
-        "client_name" => client_name,
+        "client_first_name" => client_first_name,
         "uuid" => client_uuid,
         "user_uuid" => user_uuid,
         "current_stage" => current_stage,
@@ -77,7 +78,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> get(Routes.client_path(conn, :show, client.uuid))
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to view", %{conn: conn, client: client, user: user} do
@@ -85,7 +86,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> TestHelpers.valid_session(user)
       |> get(Routes.client_path(conn, :show, client.uuid))
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -105,7 +106,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> get(Routes.client_path(conn, :index_of_all_client_data_by_user, user.uuid))
 
       assert [%{
-        "client_name" => client_name,
+        "client_first_name" => client_first_name,
         "uuid" => client_uuid,
         "user_uuid" => user_uuid,
         "current_stage" => current_stage,
@@ -127,7 +128,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       conn = get(conn, Routes.client_path(conn, :show, uuid))
 
       assert %{
-               "client_name" => "some client_name",
+               "client_first_name" => "some client_name",
                "uuid" => "7488a646-e31f-11e4-aace-600308960662",
                "user_uuid" => user_uuid
              } = json_response(conn, 200)["data"]
@@ -145,18 +146,26 @@ defmodule FocalApiWeb.ClientControllerTest do
       assert client.user == user
     end
 
-    test "renders errors when data is invalid", %{conn: conn, user: user} do
+    test "renders errors when data is invalid (missing client_first_name)", %{conn: conn, user: user} do
       conn = conn
       |> TestHelpers.valid_session(user)
       |> post(Routes.client_path(conn, :create), @invalid_attrs)
 
-      assert json_response(conn, 422)["errors"] != %{}
+      assert json_response(conn, 422)["errors"] == %{"client_first_name" => ["can't be blank"]}
+    end
+
+    test "renders errors when data is invalid (client_email not an email)", %{conn: conn, user: user} do
+      conn = conn
+      |> TestHelpers.valid_session(user)
+      |> post(Routes.client_path(conn, :create), @invalid_email_attrs)
+
+      assert json_response(conn, 422)["errors"] == %{"client_email" => ["has invalid format"]}
     end
 
     test "renders error when user is not logged in", %{conn: conn, user: _user} do
       conn = post(conn, Routes.client_path(conn, :create), @create_attrs)
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but request is not authenticated", %{conn: conn, user: _user} do
@@ -164,7 +173,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> post(Routes.client_path(conn, :create), @create_attrs)
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
   end
 
@@ -183,7 +192,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       conn = get(conn, Routes.client_path(conn, :show, uuid))
 
       assert %{
-               "client_name" => "some updated client_name",
+               "client_first_name" => "some updated client_name",
                "uuid" => uuid,
                "user_uuid" => client_user_uuid
              } = json_response(conn, 200)["data"]
@@ -204,7 +213,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> put(Routes.client_path(conn, :update, client.uuid), @update_attrs)
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to make the change", %{conn: conn, client: client, user: user} do
@@ -213,7 +222,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> TestHelpers.valid_session(user)
       |> put(Routes.client_path(conn, :update, client.uuid), @update_attrs)
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -239,7 +248,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> delete(Routes.client_path(conn, :delete, client.uuid))
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to make the change", %{conn: conn, client: client, user: user} do
@@ -247,7 +256,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> TestHelpers.valid_session(user)
       |> delete(Routes.client_path(conn, :delete, client.uuid))
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -262,9 +271,13 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> get(Routes.client_path(conn, :index_by_user, user_uuid))
 
       assert json_response(conn, 200)["data"] == [%{
-        "client_name" => "Snow",
+        "client_first_name" => "Snow",
         "user_uuid" => user_uuid,
-        "uuid" => client.uuid
+        "uuid" => client.uuid,
+        "client_email" => nil,
+        "client_last_name" => nil,
+        "client_phone_number" => nil,
+        "private_notes" => nil
       }]
     end
 

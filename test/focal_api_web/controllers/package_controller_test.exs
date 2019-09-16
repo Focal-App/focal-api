@@ -39,7 +39,7 @@ defmodule FocalApiWeb.PackageControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> get(Routes.package_path(conn, :index_by_client, client.uuid))
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to view", %{conn: conn, package: package} do
@@ -50,7 +50,7 @@ defmodule FocalApiWeb.PackageControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> get(Routes.package_path(conn, :index_by_client, client.uuid))
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -75,7 +75,7 @@ defmodule FocalApiWeb.PackageControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> get(Routes.package_path(conn, :show, package.uuid))
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to view", %{conn: conn, package: package} do
@@ -85,7 +85,7 @@ defmodule FocalApiWeb.PackageControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> get(Routes.package_path(conn, :show, package.uuid))
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -129,7 +129,7 @@ defmodule FocalApiWeb.PackageControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> post(Routes.package_path(conn, :create, client.uuid), @invalid_attrs)
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to create", %{conn: conn, client: client} do
@@ -140,7 +140,7 @@ defmodule FocalApiWeb.PackageControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> post(Routes.package_path(conn, :create, client.uuid), @invalid_attrs)
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -186,7 +186,7 @@ defmodule FocalApiWeb.PackageControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> put(Routes.package_path(conn, :update, package.uuid), @invalid_attrs)
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to update", %{conn: conn, package: package} do
@@ -196,7 +196,7 @@ defmodule FocalApiWeb.PackageControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> put(Routes.package_path(conn, :update, package.uuid), @invalid_attrs)
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -226,7 +226,7 @@ defmodule FocalApiWeb.PackageControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> delete(Routes.package_path(conn, :delete, package.uuid))
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to delete", %{conn: conn, package: package} do
@@ -236,7 +236,7 @@ defmodule FocalApiWeb.PackageControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> delete(Routes.package_path(conn, :delete, package.uuid))
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 

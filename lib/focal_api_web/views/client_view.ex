@@ -26,7 +26,11 @@ defmodule FocalApiWeb.ClientView do
   def render("client.json", %{client: client}) do
     user_uuid = user_uuid(client.uuid)
     %{
-      client_name: client.client_name,
+      client_first_name: client.client_first_name,
+      client_last_name: client.client_last_name,
+      client_email: client.client_email,
+      client_phone_number: client.client_phone_number,
+      private_notes: client.private_notes,
       uuid: client.uuid,
       user_uuid: user_uuid
     }
@@ -40,7 +44,11 @@ defmodule FocalApiWeb.ClientView do
     package = render_one(Enum.at(packages, 0), PackageView, "package_with_events.json")
 
     %{
-      client_name: client.client_name,
+      client_first_name: client.client_first_name,
+      client_last_name: client.client_last_name,
+      client_email: client.client_email,
+      client_phone_number: client.client_phone_number,
+      private_notes: client.private_notes,
       uuid: client.uuid,
       user_uuid: user_uuid,
       package: package,

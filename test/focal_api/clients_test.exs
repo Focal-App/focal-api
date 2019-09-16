@@ -6,9 +6,9 @@ defmodule FocalApi.ClientsTest do
   alias FocalApi.Clients.Client
 
   describe "clients" do
-    @valid_attrs %{client_name: "some client_name", uuid: "7488a646-e31f-11e4-aace-600308960662"}
-    @update_attrs %{client_name: "some updated client_name", uuid: "7488a646-e31f-11e4-aace-600308960668"}
-    @invalid_attrs %{client_name: nil, uuid: nil}
+    @valid_attrs %{client_first_name: "some client_name", uuid: "7488a646-e31f-11e4-aace-600308960662"}
+    @update_attrs %{client_first_name: "some updated client_name", uuid: "7488a646-e31f-11e4-aace-600308960668"}
+    @invalid_attrs %{client_first_name: nil, uuid: nil}
 
     def client_fixture(attrs \\ %{}) do
       {:ok, client} =
@@ -46,7 +46,7 @@ defmodule FocalApi.ClientsTest do
 
     test "create_client/1 with valid data creates a client" do
       assert {:ok, %Client{} = client} = Clients.create_client(@valid_attrs)
-      assert client.client_name == "some client_name"
+      assert client.client_first_name == "some client_name"
       assert client.uuid == "7488a646-e31f-11e4-aace-600308960662"
     end
 
@@ -57,7 +57,7 @@ defmodule FocalApi.ClientsTest do
     test "update_client/2 with valid data updates the client" do
       client = client_fixture()
       assert {:ok, %Client{} = client} = Clients.update_client(client, @update_attrs)
-      assert client.client_name == "some updated client_name"
+      assert client.client_first_name == "some updated client_name"
       assert client.uuid == "7488a646-e31f-11e4-aace-600308960668"
     end
 
