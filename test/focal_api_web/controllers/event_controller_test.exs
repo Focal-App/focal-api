@@ -38,7 +38,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> get(Routes.event_path(conn, :index_by_package, event.package.uuid))
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to view", %{conn: conn, event: event} do
@@ -48,7 +48,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> get(Routes.event_path(conn, :index_by_package, event.package.uuid))
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -93,7 +93,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> post(Routes.event_path(conn, :create, package.uuid), @invalid_attrs)
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to create", %{conn: conn, package: package} do
@@ -101,7 +101,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> post(Routes.event_path(conn, :create, package.uuid), @invalid_attrs)
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -148,7 +148,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> put(Routes.event_path(conn, :update, event.uuid), @invalid_attrs)
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to update", %{conn: conn, event: event} do
@@ -158,7 +158,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> put(Routes.event_path(conn, :update, event.uuid), @invalid_attrs)
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 
@@ -187,7 +187,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.invalid_session("test_id_token")
       |> delete(Routes.event_path(conn, :delete, event.uuid))
 
-      assert json_response(conn, 401)["errors"] != %{}
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
     end
 
     test "renders error when user is logged in but not authorized to delete", %{conn: conn, event: event} do
@@ -197,7 +197,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.valid_session(TestHelpers.user_fixture())
       |> delete(Routes.event_path(conn, :delete, event.uuid))
 
-      assert json_response(conn, 403)["errors"] != %{}
+      assert json_response(conn, 403)["errors"] == %{"detail" => "Forbidden"}
     end
   end
 

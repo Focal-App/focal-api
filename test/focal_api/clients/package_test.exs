@@ -5,7 +5,7 @@ defmodule FocalApi.PackageTest do
   alias FocalApi.TestHelpers
 
   setup do
-    client = TestHelpers.client_fixture(%{ client_name: "John" })
+    client = TestHelpers.client_fixture(%{ client_first_name: "John" })
 
     package = Repo.insert!(%Package{
       package_name: "Engagements",
@@ -22,6 +22,6 @@ defmodule FocalApi.PackageTest do
 
     expected_client = package.client
 
-    assert expected_client.client_name == "John"
+    assert expected_client.client_first_name == "John"
   end
 end

@@ -33,7 +33,11 @@ defmodule FocalApi.TestHelpers do
     params =
       attrs
       |> Enum.into(%{
-        client_name: "Snow",
+        client_first_name: "Snow",
+        client_last_name: nil,
+        client_email: nil,
+        client_phone_number: nil,
+        private_notes: nil,
         uuid: Ecto.UUID.generate(),
         user_id: user.id,
       })

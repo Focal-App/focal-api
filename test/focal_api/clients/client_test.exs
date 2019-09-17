@@ -8,7 +8,7 @@ defmodule FocalApi.ClientTest do
     user = TestHelpers.user_fixture(%{ first_name: "John" })
 
     client = Repo.insert!(%Client{
-      client_name: "Snow",
+      client_first_name: "Snow",
       user_id: user.id,
       uuid: Ecto.UUID.generate()})
 

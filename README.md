@@ -48,3 +48,15 @@ export CLIENT_HOST=http://localhost:<client_port>
 ## Running Tests
 - `source .env`
 - `mix test`
+
+## Updating a schema
+1. Update schema and create new migration record
+2. Update any views related to the schema
+3. Drop Test database 
+4. Run migration
+5. Run all tests
+
+Migrations, when run, cannot be updated. If you need to make any updates to the 
+migration changes you just made, you will need to either delete the migration 
+file and create a new one with all correct chanegs. Or, create a new migration 
+file specifying the changes you missed. 
