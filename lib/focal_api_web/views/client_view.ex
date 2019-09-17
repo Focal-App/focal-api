@@ -15,6 +15,10 @@ defmodule FocalApiWeb.ClientView do
     %{data: render_many(clients, ClientView, "all_client_data.json")}
   end
 
+  def render("index_of_partial_client_data.json", %{clients: clients}) do
+    %{data: render_many(clients, ClientView, "partial_client_data.json")}
+  end
+
   def render("show.json", %{client: client}) do
     %{data: render_one(client, ClientView, "client.json")}
   end
@@ -53,6 +57,23 @@ defmodule FocalApiWeb.ClientView do
       user_uuid: user_uuid,
       package: package,
       current_stage: current_stage
+    }
+  end
+
+  def render("partial_client_data.json", %{client: client}) do
+    packages = Clients.list_packages_by_client(client.uuid)
+    first_uncompleted_task = Clients.list_first_uncompleted_task_by_client(client.uuid)
+    current_stage = if (length(first_uncompleted_task) == 0), do: %{}, else: render_one(Enum.at(first_uncompleted_task, 0), TaskView, "task.json")
+    package = render_one(Enum.at(packages, 0), PackageView, "package_with_events.json")
+    package_name = if (package != nil), do: package.package_name, else: nil
+    upcoming_shoot_date = if (package != nil && length(package.package_events) > 0), do: Enum.at(package.package_events, 0).shoot_date, else: nil
+    %{
+      client_first_name: client.client_first_name,
+      partner_first_name: client.client_last_name,
+      package_name: package_name,
+      upcoming_shoot_date: upcoming_shoot_date,
+      current_stage: current_stage,
+      uuid: client.uuid
     }
   end
 

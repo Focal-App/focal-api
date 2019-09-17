@@ -19,33 +19,6 @@ alias FocalApi.Accounts.User
 alias FocalApi.Accounts
 alias FocalApi.Repo
 
-# user = %User{
-#   avatar: "avatar-image",
-#   email: "user@gmail.com",
-#   first_name: "First User",
-#   provider: "google",
-#   uuid: Ecto.UUID.generate(),
-# }
-# Repo.insert!(user)
-# user = Repo.get_by(User, uuid: user.uuid)
-
-# client = %Client{
-#   client_name: "Snow White",
-#   uuid: Ecto.UUID.generate(),
-#   user_id: user.id
-# }
-# Repo.insert!(client)
-# client = Repo.get_by(Client, uuid: client.uuid)
-
-# package = %Package{
-#   package_name: "Engagements",
-#   uuid: Ecto.UUID.generate(),
-#   client_id: client.id
-# }
-# Repo.insert!(package)
-# package = Repo.get_by(Package, uuid: package.uuid)
-
-
 {:ok, date, _} = DateTime.from_iso8601("2020-04-17T14:00:00Z")
 date = date |> DateTime.truncate(:second)
 
@@ -53,7 +26,7 @@ francesca = Accounts.get_user_by_email("littlegangwolf@gmail.com")
 
 # Francesca Client 1
 francesca_client = %Client{
-  client_first_name: "Natasha & Zihao",
+  client_first_name: "Natasha",
   client_last_name: nil,
   client_email: nil,
   client_phone_number: nil,
@@ -95,7 +68,7 @@ francesca_client_task = Repo.get_by(Task, uuid: francesca_client_task.uuid)
 
 # Francesca Client 2
 francesca_client2 = %Client{
-  client_first_name: "Andrew & Diane",
+  client_first_name: "Diane",
   client_last_name: nil,
   client_email: nil,
   client_phone_number: nil,

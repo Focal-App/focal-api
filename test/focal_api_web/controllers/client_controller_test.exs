@@ -107,10 +107,11 @@ defmodule FocalApiWeb.ClientControllerTest do
 
       assert [%{
         "client_first_name" => client_first_name,
-        "uuid" => client_uuid,
-        "user_uuid" => user_uuid,
+        "partner_first_name" => partner_first_name,
+        "package_name" => package_name,
+        "upcoming_shoot_date" => upcoming_shoot_date,
         "current_stage" => current_stage,
-        "package" => package
+        "uuid" => client_uuid,
       }] = json_response(conn, 200)["data"]
     end
   end
