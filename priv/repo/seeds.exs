@@ -16,6 +16,7 @@ alias FocalApi.Clients.Package
 alias FocalApi.Clients.Event
 alias FocalApi.Clients.Task
 alias FocalApi.Accounts.User
+alias FocalApi.Accounts.Contact
 alias FocalApi.Accounts
 alias FocalApi.Repo
 
@@ -33,10 +34,43 @@ francesca_client = %Client{
 Repo.insert!(francesca_client)
 francesca_client = Repo.get_by(Client, uuid: francesca_client.uuid)
 
+francesca_client_contact = %Contact{
+  best_time_to_contact: "Evening",
+  email: "some@email.com",
+  first_name: "Natasha",
+  label: "Bride",
+  last_name: "Lee",
+  phone_number: "123-456-7890",
+  uuid: Ecto.UUID.generate(),
+  client_id: francesca_client.id
+}
+Repo.insert!(francesca_client_contact)
+francesca_client_contact = Repo.get_by(Contact, uuid: francesca_client_contact.uuid)
+
 francesca_client_package = %Package{
   package_name: "Wedding Premier",
   uuid: Ecto.UUID.generate(),
-  client_id: francesca_client.id
+  client_id: francesca_client.id,
+  proposal_signed: false,
+  package_contents: ~s(Up To Ten Hours of Photographic Coverage
+
+  Two Photographers
+
+  Handcrafted 10x10 Thirty Sided
+  Artisan Album
+
+  Complimentary Engagement Session
+
+  Private Online Gallery of All Images for Friends and Family
+
+  Seven Hundred+ Digital Negatives on a Custom USB Drive),
+  package_price: 520000,
+  retainer_price: 100000,
+  retainer_paid_amount: 0,
+  retainer_paid: false,
+  discount_offered: 0,
+  balance_remaining: 520000,
+  balance_received: false,
 }
 Repo.insert!(francesca_client_package)
 francesca_client_package = Repo.get_by(Package, uuid: francesca_client_package.uuid)
@@ -71,10 +105,40 @@ francesca_client2 = %Client{
 Repo.insert!(francesca_client2)
 francesca_client2 = Repo.get_by(Client, uuid: francesca_client2.uuid)
 
+francesca_client_contact2 = %Contact{
+  best_time_to_contact: "Morning",
+  email: "some@email.com",
+  first_name: "Sandy",
+  label: "Bride",
+  last_name: "Brooks",
+  phone_number: "123-456-7890",
+  uuid: Ecto.UUID.generate(),
+  client_id: francesca_client2.id
+}
+Repo.insert!(francesca_client_contact2)
+francesca_client_contact2 = Repo.get_by(Contact, uuid: francesca_client_contact2.uuid)
+
 francesca_client_package2 = %Package{
   package_name: "Wedding Classic",
   uuid: Ecto.UUID.generate(),
-  client_id: francesca_client2.id
+  client_id: francesca_client2.id,
+  proposal_signed: false,
+  package_contents: ~s(Up To Eight Hours of Photographic Coverage
+
+  Handcrafted 10x10 Thirty Sided Artisan Album
+
+  Complimentary Engagement Session
+
+  Private Online Gallery of All Images for Friends and Family
+
+  Five Hundred+ Digital Negatives on a Custom USB Drive),
+  package_price: 480000,
+  retainer_price: 100000,
+  retainer_paid_amount: 100000,
+  retainer_paid: true,
+  discount_offered: 0,
+  balance_remaining: 380000,
+  balance_received: false,
 }
 Repo.insert!(francesca_client_package2)
 francesca_client_package2 = Repo.get_by(Package, uuid: francesca_client_package2.uuid)

@@ -74,6 +74,26 @@ defmodule FocalApi.TestHelpers do
       attrs
       |> Enum.into(%{
         package_name: "some package_name",
+        proposal_signed: false,
+        package_contents: ~s(Up To Ten Hours of Photographic Coverage
+
+        Two Photographers
+
+        Handcrafted 10x10 Thirty Sided
+        Artisan Album
+
+        Complimentary Engagement Session
+
+        Private Online Gallery of All Images for Friends and Family
+
+        Seven Hundred+ Digital Negatives on a Custom USB Drive),
+        package_price: 500000,
+        retainer_price: 100000,
+        retainer_paid_amount: 0,
+        retainer_paid: false,
+        discount_offered: 0,
+        balance_remaining: 500000,
+        balance_received: false,
         uuid: Ecto.UUID.generate(),
         client_id: client.id,
       })

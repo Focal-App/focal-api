@@ -104,9 +104,18 @@ defmodule FocalApiWeb.PackageControllerTest do
       conn = get(conn, Routes.package_path(conn, :show, uuid))
 
       assert %{
-               "package_name" => "some package_name",
-               "uuid" => uuid,
-               "client_uuid" => client_uuid
+                "package_name" => "some package_name",
+                "uuid" => uuid,
+                "client_uuid" => client_uuid,
+                "proposal_signed" => proposal_signed,
+                "package_contents" => package_contents,
+                "package_price" => package_price,
+                "retainer_price" => retainer_price,
+                "retainer_paid_amount" => retainer_paid_amount,
+                "retainer_paid" => retainer_paid,
+                "discount_offered" => discount_offered,
+                "balance_remaining" => balance_remaining,
+                "balance_received" => balance_received,
              } = json_response(conn, 200)["data"]
     end
 
@@ -163,7 +172,16 @@ defmodule FocalApiWeb.PackageControllerTest do
       assert %{
                "package_name" => "some updated package_name",
                "uuid" => uuid,
-               "client_uuid" => package_client_uuid
+               "client_uuid" => package_client_uuid,
+               "proposal_signed" => proposal_signed,
+                "package_contents" => package_contents,
+                "package_price" => package_price,
+                "retainer_price" => retainer_price,
+                "retainer_paid_amount" => retainer_paid_amount,
+                "retainer_paid" => retainer_paid,
+                "discount_offered" => discount_offered,
+                "balance_remaining" => balance_remaining,
+                "balance_received" => balance_received,
              } = json_response(conn, 200)["data"]
     end
 

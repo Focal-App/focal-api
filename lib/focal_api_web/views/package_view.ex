@@ -17,7 +17,16 @@ defmodule FocalApiWeb.PackageView do
     %{
       package_name: package.package_name,
       uuid: package.uuid,
-      client_uuid: client_uuid(package.uuid)
+      client_uuid: client_uuid(package.uuid),
+      proposal_signed: package.proposal_signed,
+      package_contents: package.package_contents,
+      package_price: package.package_price,
+      retainer_price: package.retainer_price,
+      retainer_paid_amount: package.retainer_paid_amount,
+      retainer_paid: package.retainer_paid,
+      discount_offered: package.discount_offered,
+      balance_remaining: package.balance_remaining,
+      balance_received: package.balance_received,
     }
   end
 
@@ -27,7 +36,16 @@ defmodule FocalApiWeb.PackageView do
       package_name: package.package_name,
       uuid: package.uuid,
       client_uuid: client_uuid(package.uuid),
-      package_events: render_many(package_events, EventView, "event.json")
+      package_events: render_many(package_events, EventView, "event.json"),
+      proposal_signed: package.proposal_signed,
+      package_contents: package.package_contents,
+      package_price: package.package_price,
+      retainer_price: package.retainer_price,
+      retainer_paid_amount: package.retainer_paid_amount,
+      retainer_paid: package.retainer_paid,
+      discount_offered: package.discount_offered,
+      balance_remaining: package.balance_remaining,
+      balance_received: package.balance_received,
     }
   end
 

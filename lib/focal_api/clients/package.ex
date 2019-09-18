@@ -5,6 +5,16 @@ defmodule FocalApi.Clients.Package do
 
   schema "packages" do
     field :package_name, :string
+    field :proposal_signed, :boolean
+    field :package_contents, :string
+    field :package_price, :integer
+    field :retainer_price, :integer
+    field :retainer_paid_amount, :integer
+    field :retainer_paid, :boolean
+    field :discount_offered, :integer
+    field :balance_remaining, :integer
+    field :balance_received, :boolean
+
     field :uuid, Ecto.UUID
     belongs_to :client, Client
 
@@ -14,7 +24,20 @@ defmodule FocalApi.Clients.Package do
   @doc false
   def changeset(package, attrs) do
     package
-    |> cast(attrs, [:package_name, :uuid, :client_id])
+    |> cast(attrs, [
+      :package_name,
+      :proposal_signed,
+      :package_contents,
+      :package_price,
+      :retainer_price,
+      :retainer_paid_amount,
+      :retainer_paid,
+      :discount_offered,
+      :balance_remaining,
+      :balance_received,
+      :uuid,
+      :client_id
+      ])
     |> validate_required([:package_name, :uuid])
   end
 end
