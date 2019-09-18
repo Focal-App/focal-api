@@ -26,10 +26,6 @@ francesca = Accounts.get_user_by_email("littlegangwolf@gmail.com")
 
 # Francesca Client 1
 francesca_client = %Client{
-  client_first_name: "Natasha",
-  client_last_name: nil,
-  client_email: nil,
-  client_phone_number: nil,
   private_notes: nil,
   uuid: Ecto.UUID.generate(),
   user_id: francesca.id
@@ -68,10 +64,6 @@ francesca_client_task = Repo.get_by(Task, uuid: francesca_client_task.uuid)
 
 # Francesca Client 2
 francesca_client2 = %Client{
-  client_first_name: "Diane",
-  client_last_name: nil,
-  client_email: nil,
-  client_phone_number: nil,
   private_notes: nil,
   uuid: Ecto.UUID.generate(),
   user_id: francesca.id
