@@ -34,6 +34,14 @@ mix ecto.migrate
 ```
 git push heroku <branch_name>:master
 ```
+#### Resetting Deployed Heroku Databases
+```
+heroku pg:info // get db_name from add-on field. 
+heroku pg:reset DB_NAME
+heroku run MIX_ENV=prod mix ecto.migrate
+heroku run MIX_ENV=prod mix run priv/repo/seeds.exs
+heroku restart
+```
 
 ## Setting up Environment Variables + Starting Local Server
 -  Create a .env file in your root and add the following
@@ -60,3 +68,4 @@ Migrations, when run, cannot be updated. If you need to make any updates to the
 migration changes you just made, you will need to either delete the migration 
 file and create a new one with all correct chanegs. Or, create a new migration 
 file specifying the changes you missed. 
+
