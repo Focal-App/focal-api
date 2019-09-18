@@ -61,7 +61,7 @@ defmodule FocalApiWeb.ClientController do
     |> Map.put("uuid", client_uuid)
 
     with {:ok, %Client{} = client} <- Clients.update_client(client, update_client_attrs) do
-      render(conn, "show.json", client: client)
+      render(conn, "show_all_client_data.json", client: client)
     end
   end
 
