@@ -4,8 +4,10 @@ defmodule FocalApi.PackageTest do
   alias FocalApi.Clients.Package
   alias FocalApi.TestHelpers
 
+  @client_uuid Ecto.UUID.generate()
+
   setup do
-    client = TestHelpers.client_fixture(%{ client_first_name: "John" })
+    client = TestHelpers.client_fixture(%{ uuid: @client_uuid })
 
     package = Repo.insert!(%Package{
       package_name: "Engagements",
@@ -22,6 +24,6 @@ defmodule FocalApi.PackageTest do
 
     expected_client = package.client
 
-    assert expected_client.client_first_name == "John"
+    assert expected_client.uuid == @client_uuid
   end
 end

@@ -5,15 +5,26 @@ defmodule FocalApiWeb.ClientControllerTest do
   alias FocalApi.TestHelpers
 
   @create_attrs %{
-    client_first_name: "some client_name",
+    contacts: [%{
+      first_name: "some client_name"
+    }],
     uuid: "7488a646-e31f-11e4-aace-600308960662",
+    private_notes: nil
   }
   @update_attrs %{
-    client_first_name: "some updated client_name",
-    uuid: "7488a646-e31f-11e4-aace-600308960662"
+    uuid: "7488a646-e31f-11e4-aace-600308960662",
+    contacts: [
+      %{
+        first_name: "Client name",
+        label: "Client"
+      },
+      %{
+        first_name: "New Partner name",
+        label: "Partner"
+      }
+    ],
+    private_notes: nil
   }
-  @invalid_attrs %{client_first_name: nil, uuid: "7488a646-e31f-11e4-aace-600308960662"}
-  @invalid_email_attrs %{client_first_name: "snow", client_email: "not an email", uuid: "7488a646-e31f-11e4-aace-600308960662"}
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
@@ -65,7 +76,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> get(Routes.client_path(conn, :show_all_client_data, client.uuid))
 
       assert %{
-        "client_first_name" => client_first_name,
+        "contacts" => contacts,
         "uuid" => client_uuid,
         "user_uuid" => user_uuid,
         "current_stage" => current_stage,
@@ -107,10 +118,11 @@ defmodule FocalApiWeb.ClientControllerTest do
 
       assert [%{
         "client_first_name" => client_first_name,
-        "uuid" => client_uuid,
-        "user_uuid" => user_uuid,
+        "partner_first_name" => partner_first_name,
+        "package_name" => package_name,
+        "upcoming_shoot_date" => upcoming_shoot_date,
         "current_stage" => current_stage,
-        "package" => package
+        "uuid" => client_uuid,
       }] = json_response(conn, 200)["data"]
     end
   end
@@ -128,8 +140,9 @@ defmodule FocalApiWeb.ClientControllerTest do
       conn = get(conn, Routes.client_path(conn, :show, uuid))
 
       assert %{
-               "client_first_name" => "some client_name",
-               "uuid" => "7488a646-e31f-11e4-aace-600308960662",
+               "contacts" => contacts,
+               "private_notes" => private_notes,
+               "uuid" => uuid,
                "user_uuid" => user_uuid
              } = json_response(conn, 200)["data"]
     end
@@ -144,22 +157,6 @@ defmodule FocalApiWeb.ClientControllerTest do
       client = TestHelpers.preloaded_client(uuid)
 
       assert client.user == user
-    end
-
-    test "renders errors when data is invalid (missing client_first_name)", %{conn: conn, user: user} do
-      conn = conn
-      |> TestHelpers.valid_session(user)
-      |> post(Routes.client_path(conn, :create), @invalid_attrs)
-
-      assert json_response(conn, 422)["errors"] == %{"client_first_name" => ["can't be blank"]}
-    end
-
-    test "renders errors when data is invalid (client_email not an email)", %{conn: conn, user: user} do
-      conn = conn
-      |> TestHelpers.valid_session(user)
-      |> post(Routes.client_path(conn, :create), @invalid_email_attrs)
-
-      assert json_response(conn, 422)["errors"] == %{"client_email" => ["has invalid format"]}
     end
 
     test "renders error when user is not logged in", %{conn: conn, user: _user} do
@@ -182,30 +179,64 @@ defmodule FocalApiWeb.ClientControllerTest do
 
     test "renders client when data is valid", %{conn: conn, client: %Client{uuid: uuid} = _client} do
       client = TestHelpers.preloaded_client(uuid)
+      first_client_contact = List.first(client.contacts).uuid
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
-      |> put(Routes.client_path(conn, :update, uuid), @update_attrs)
+      |> put(Routes.client_path(conn, :update, uuid), %{
+        uuid: "7488a646-e31f-11e4-aace-600308960662",
+        contacts: [
+          %{
+            first_name: "Client name",
+            label: "Client",
+            uuid: first_client_contact
+          },
+          %{
+            first_name: "New Partner name",
+            label: "Partner"
+          }
+        ]
+      })
 
-      assert %{"uuid" => ^uuid} = json_response(conn, 200)["data"]
+      assert %{
+        "uuid" => ^uuid,
+        "contacts" => [
+          %{
+            "uuid" => first_contact_uuid
+          },
+          %{
+            "uuid" => second_contact_uuid
+          }
+        ]
+      } = json_response(conn, 200)["data"]
 
       conn = get(conn, Routes.client_path(conn, :show, uuid))
 
       assert %{
-               "client_first_name" => "some updated client_name",
-               "uuid" => uuid,
-               "user_uuid" => client_user_uuid
-             } = json_response(conn, 200)["data"]
-    end
-
-    test "renders errors when data is invalid", %{conn: conn, client: client} do
-      client = TestHelpers.preloaded_client(client.uuid)
-
-      conn = conn
-      |> TestHelpers.valid_session(client.user)
-      |> put(Routes.client_path(conn, :update, client.uuid), @invalid_attrs)
-
-      assert json_response(conn, 422)["errors"] != %{}
+              "contacts" => [
+                %{
+                "first_name" => "Client name",
+                "label" => "Client",
+                "best_time_to_contact" => "some best_time_to_contact",
+                "email" => "some@email.com",
+                "last_name" => "some last_name",
+                "phone_number" => "some phone_number",
+                "uuid" => first_client_contact
+                },
+                %{
+                  "best_time_to_contact" => nil,
+                  "email" => nil,
+                  "first_name" => "New Partner name",
+                  "label" => "Partner",
+                  "last_name" => nil,
+                  "phone_number" => nil,
+                  "uuid" => second_contact_uuid
+                }
+              ],
+              "private_notes" => nil,
+              "uuid" => uuid,
+              "user_uuid" => client.user.uuid
+             } == json_response(conn, 200)["data"]
     end
 
     test "renders error when user is logged in but request is not authenticated", %{conn: conn, client: client, user: _user} do
@@ -264,21 +295,27 @@ defmodule FocalApiWeb.ClientControllerTest do
     setup [:create_client, :create_user]
     test "lists all clients for a user", %{conn: conn, client: client} do
       client = TestHelpers.preloaded_client(client.uuid)
+      contact_uuid = List.first(client.contacts).uuid
       user_uuid = client.user.uuid
 
       conn = conn
       |> TestHelpers.valid_session(client.user)
       |> get(Routes.client_path(conn, :index_by_user, user_uuid))
 
-      assert json_response(conn, 200)["data"] == [%{
-        "client_first_name" => "Snow",
+      assert [%{
         "user_uuid" => user_uuid,
         "uuid" => client.uuid,
-        "client_email" => nil,
-        "client_last_name" => nil,
-        "client_phone_number" => nil,
-        "private_notes" => nil
-      }]
+        "private_notes" => nil,
+        "contacts" => [%{
+          "best_time_to_contact" => "some best_time_to_contact",
+          "email" => "some@email.com",
+          "first_name" => "some first_name",
+          "label" => "some label",
+          "last_name" => "some last_name",
+          "phone_number" => "some phone_number",
+          "uuid" => contact_uuid
+        }]
+      }] == json_response(conn, 200)["data"]
     end
 
     test "renders error when user is logged in but request is not authenticated", %{conn: conn, client: _client, user: user} do

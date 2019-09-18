@@ -11,7 +11,7 @@ defmodule FocalApi.Clients do
   def list_clients_by_user(user_uuid) do
     user = Accounts.get_user_by_uuid!(user_uuid)
     query = from client in Client, where: ^user.id == client.user_id
-    Repo.all(query, preload: [:user])
+    Repo.all(query, preload: [:user, :contact])
   end
 
   def get_client!(id), do: Repo.get!(Client, id)

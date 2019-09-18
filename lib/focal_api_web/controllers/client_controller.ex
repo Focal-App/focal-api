@@ -3,6 +3,8 @@ defmodule FocalApiWeb.ClientController do
 
   alias FocalApi.Clients
   alias FocalApi.Clients.Client
+  alias FocalApi.Accounts
+  alias FocalApi.Repo
 
   action_fallback FocalApiWeb.FallbackController
 
@@ -17,22 +19,23 @@ defmodule FocalApiWeb.ClientController do
 
   def index_of_all_client_data_by_user(conn, %{"user_uuid" => user_uuid}) do
     clients = Clients.list_clients_by_user(user_uuid)
-    render(conn, "index_of_all_client_data.json", clients: clients)
+    render(conn, "index_of_partial_client_data.json", clients: clients)
   end
 
   def create(conn, params) do
     current_user = conn.assigns[:user]
 
-    create_attrs = params
+    create_client_attrs = params
     |> Map.put("user_id", current_user.id)
     |> Map.put_new("uuid", Ecto.UUID.generate)
+    {:ok, %Client{} = client} = Clients.create_client(create_client_attrs)
 
-    with {:ok, %Client{} = client} <- Clients.create_client(create_attrs) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", Routes.client_path(conn, :show, client))
-      |> render("show.json", client: client)
-    end
+    params["contacts"] |> Enum.each(fn contact -> create_contact(contact, client) end)
+
+    conn
+    |> put_status(:created)
+    |> put_resp_header("location", Routes.client_path(conn, :show, client))
+    |> render("show.json", client: client)
   end
 
   def show(conn, %{"client_uuid" => client_uuid}) do
@@ -40,6 +43,7 @@ defmodule FocalApiWeb.ClientController do
     render(conn, "show.json", client: client)
   end
 
+  @spec show_all_client_data(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show_all_client_data(conn, %{"client_uuid" => client_uuid}) do
     client = Clients.get_client_by_uuid!(client_uuid)
     render(conn, "show_all_client_data.json", client: client)
@@ -47,12 +51,16 @@ defmodule FocalApiWeb.ClientController do
 
   def update(conn, params) do
     client_uuid = params["client_uuid"]
-    client = Clients.get_client_by_uuid!(client_uuid)
+    client = Clients.get_client_by_uuid!(client_uuid) |> Repo.preload(:contacts)
 
-    update_attrs = params
+    params["contacts"] |> Enum.each(fn contact ->
+      if (Map.has_key?(contact, "uuid")), do: update_contact(contact), else: create_contact(contact, client)
+    end)
+
+    update_client_attrs = params
     |> Map.put("uuid", client_uuid)
 
-    with {:ok, %Client{} = client} <- Clients.update_client(client, update_attrs) do
+    with {:ok, %Client{} = client} <- Clients.update_client(client, update_client_attrs) do
       render(conn, "show.json", client: client)
     end
   end
@@ -78,5 +86,18 @@ defmodule FocalApiWeb.ClientController do
       |> render("403.json")
       |> halt()
     end
+  end
+
+  defp create_contact(contact, client) do
+    contact
+    |> Map.put("uuid", Ecto.UUID.generate())
+    |> Map.put("client_id", client.id)
+    |> Accounts.create_contact()
+  end
+
+  defp update_contact(contact) do
+    original_contact = Accounts.get_contact_by_uuid(contact["uuid"])
+    contact = Map.put(contact, "uuid", original_contact.uuid)
+    Accounts.update_contact(original_contact, contact)
   end
 end

@@ -14,21 +14,19 @@ defmodule FocalApiWeb.PackageView do
   end
 
   def render("package.json", %{package: package}) do
-    client_uuid = client_uuid(package.uuid)
     %{
       package_name: package.package_name,
       uuid: package.uuid,
-      client_uuid: client_uuid
+      client_uuid: client_uuid(package.uuid)
     }
   end
 
   def render("package_with_events.json", %{package: package}) do
-    client_uuid = client_uuid(package.uuid)
     package_events = Clients.list_events_by_package(package.uuid)
     %{
       package_name: package.package_name,
       uuid: package.uuid,
-      client_uuid: client_uuid,
+      client_uuid: client_uuid(package.uuid),
       package_events: render_many(package_events, EventView, "event.json")
     }
   end

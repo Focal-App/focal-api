@@ -3,6 +3,7 @@ defmodule FocalApi.TestHelpers do
 
   alias FocalApi.Repo
   alias FocalApi.Accounts.User
+  alias FocalApi.Accounts.Contact
   alias FocalApi.Clients.Client
   alias FocalApi.Clients
   alias FocalApi.Clients.Package
@@ -33,10 +34,6 @@ defmodule FocalApi.TestHelpers do
     params =
       attrs
       |> Enum.into(%{
-        client_first_name: "Snow",
-        client_last_name: nil,
-        client_email: nil,
-        client_phone_number: nil,
         private_notes: nil,
         uuid: Ecto.UUID.generate(),
         user_id: user.id,
@@ -46,7 +43,28 @@ defmodule FocalApi.TestHelpers do
       Client.changeset(%Client{}, params)
       |> Repo.insert()
 
+    _contact = contact_fixture(%{ client_id: client.id })
     client
+  end
+
+  def contact_fixture(attrs \\ %{}) do
+    params =
+      attrs
+      |> Enum.into(%{
+        best_time_to_contact: "some best_time_to_contact",
+        email: "some@email.com",
+        first_name: "some first_name",
+        label: "some label",
+        last_name: "some last_name",
+        phone_number: "some phone_number",
+        uuid: Ecto.UUID.generate(),
+      })
+
+    {:ok, contact} =
+      Contact.changeset(%Contact{}, params)
+      |> Repo.insert()
+
+      contact
   end
 
   def package_fixture(attrs \\ %{}) do
@@ -132,6 +150,7 @@ defmodule FocalApi.TestHelpers do
     uuid
     |> Clients.get_client_by_uuid!
     |> Repo.preload(:user)
+    |> Repo.preload(:contacts)
   end
 
   def preloaded_event(uuid) do
