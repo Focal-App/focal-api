@@ -12,7 +12,8 @@ defmodule FocalApi.Repo.Migrations.UpdatePackage do
       add :discount_offered, :integer
       add :balance_remaining, :integer
       add :balance_received, :boolean
-
+      add :wedding_included, :boolean
+      add :engagement_included, :boolean
     end
   end
 end

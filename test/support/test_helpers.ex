@@ -96,6 +96,8 @@ defmodule FocalApi.TestHelpers do
         balance_received: false,
         uuid: Ecto.UUID.generate(),
         client_id: client.id,
+        wedding_included: true,
+        engagement_included: true,
       })
 
     {:ok, package} =

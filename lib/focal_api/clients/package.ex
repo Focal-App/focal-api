@@ -14,6 +14,8 @@ defmodule FocalApi.Clients.Package do
     field :discount_offered, :integer
     field :balance_remaining, :integer
     field :balance_received, :boolean
+    field :wedding_included, :boolean
+    field :engagement_included, :boolean
 
     field :uuid, Ecto.UUID
     belongs_to :client, Client
@@ -35,6 +37,8 @@ defmodule FocalApi.Clients.Package do
       :discount_offered,
       :balance_remaining,
       :balance_received,
+      :wedding_included,
+      :engagement_included,
       :uuid,
       :client_id
       ])

@@ -71,6 +71,8 @@ francesca_client_package = %Package{
   discount_offered: 0,
   balance_remaining: 520000,
   balance_received: false,
+  wedding_included: true,
+  engagement_included: true,
 }
 Repo.insert!(francesca_client_package)
 francesca_client_package = Repo.get_by(Package, uuid: francesca_client_package.uuid)
@@ -139,6 +141,8 @@ francesca_client_package2 = %Package{
   discount_offered: 0,
   balance_remaining: 380000,
   balance_received: false,
+  wedding_included: true,
+  engagement_included: true,
 }
 Repo.insert!(francesca_client_package2)
 francesca_client_package2 = Repo.get_by(Package, uuid: francesca_client_package2.uuid)
