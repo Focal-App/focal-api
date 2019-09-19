@@ -18,7 +18,6 @@ defmodule FocalApi.Clients.Client do
     timestamps()
   end
 
-  @doc false
   def changeset(client, attrs) do
     client
     |> cast(attrs, [:private_notes, :uuid, :user_id])

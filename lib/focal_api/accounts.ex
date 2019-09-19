@@ -58,10 +58,6 @@ defmodule FocalApi.Accounts do
     |> Repo.insert()
   end
 
-  @spec update_contact(
-          FocalApi.Accounts.Contact.t(),
-          :invalid | %{optional(:__struct__) => none, optional(atom | binary) => any}
-        ) :: any
   def update_contact(%Contact{} = contact, attrs) do
     contact
     |> Contact.changeset(attrs)
