@@ -50,14 +50,23 @@ defmodule FocalApiWeb.PackageView do
       balance_received: package.balance_received,
       wedding_included: package.wedding_included,
       engagement_included: package.engagement_included,
+      upcoming_shoot_date: upcoming_shoot_date(package, package_events),
     }
   end
 
   defp client_uuid(uuid) do
-    package = uuid
+    package = preloaded_package(uuid)
+    package.client.uuid
+  end
+
+  defp preloaded_package(uuid) do
+    uuid
     |> Clients.get_package_by_uuid!
     |> Repo.preload(:client)
+  end
 
-    package.client.uuid
+  defp upcoming_shoot_date(package, package_events) do
+    package_exists = package != nil && length(package_events) > 0
+    if package_exists, do: Clients.get_earliest_shoot_date_by_package(package.uuid), else: nil
   end
 end

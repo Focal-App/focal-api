@@ -119,6 +119,18 @@ defmodule FocalApi.ClientsTest do
       assert Clients.get_package_by_uuid!(package.uuid) == package
     end
 
+    test "get_earliest_shoot_date_by_package/1 returns earliest shoot date for a set of package events" do
+      package = package_fixture()
+      {:ok, date1, _} = DateTime.from_iso8601("2010-04-17T14:00:00Z")
+      {:ok, date2, _} = DateTime.from_iso8601("2008-09-17T14:00:00Z")
+      {:ok, date3, _} = DateTime.from_iso8601("2010-01-17T14:00:00Z")
+      TestHelpers.event_fixture(%{ package_id: package.id, shoot_date: date1 })
+      TestHelpers.event_fixture(%{ package_id: package.id, shoot_date: date2 })
+      TestHelpers.event_fixture(%{ package_id: package.id, shoot_date: date3 })
+
+      assert Clients.get_earliest_shoot_date_by_package(package.uuid) == date2
+    end
+
     test "create_package/1 with valid data creates a package" do
       assert {:ok, %Package{} = package} = Clients.create_package(@valid_attrs)
       assert package.package_name == "some package_name"

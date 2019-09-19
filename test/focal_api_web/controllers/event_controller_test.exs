@@ -72,6 +72,7 @@ defmodule FocalApiWeb.EventControllerTest do
                "uuid" => uuid,
                "client_uuid" => package_client_uuid,
                "package_uuid" => package_uuid,
+               "shoot_location" => shoot_location
              } = json_response(conn, 200)["data"]
     end
 

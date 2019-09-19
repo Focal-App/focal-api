@@ -110,15 +110,24 @@ defmodule FocalApi.TestHelpers do
   def event_fixture(attrs \\ %{}) do
     client = client_fixture()
     package = package_fixture(%{ client_id: client.id })
-
+    {:ok, date1, _} = DateTime.from_iso8601("2010-04-17T14:00:00Z")
     params =
       attrs
       |> Enum.into(%{
         event_name: "some event_name",
-        shoot_date: "2010-04-17T14:00:00Z",
+        shoot_date: date1,
         uuid: Ecto.UUID.generate(),
         client_id: client.id,
-        package_id: package.id
+        package_id: package.id,
+        shoot_time: "6AM - 11AM",
+        shoot_location: "Los Angeles Poppy Fields",
+        edit_image_deadline: date1,
+        gallery_link: "http://google.com",
+        blog_link: "http://google.com",
+        wedding_location: nil,
+        reception_location: nil,
+        coordinator_name: nil,
+        notes: "Have clients bring extra flowers and a see through chair.",
       })
 
     {:ok, event} =

@@ -85,7 +85,8 @@ defmodule FocalApiWeb.ClientView do
   end
 
   defp upcoming_shoot_date(package) do
-    if (package != nil && length(package.package_events) > 0), do: Enum.at(package.package_events, 0).shoot_date, else: nil
+    package_exists = package != nil && length(package.package_events) > 0
+    if package_exists, do: Clients.get_earliest_shoot_date_by_package(package.uuid), else: nil
   end
 
   defp current_stage(client_uuid) do

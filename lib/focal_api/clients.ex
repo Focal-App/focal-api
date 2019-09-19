@@ -3,6 +3,7 @@ defmodule FocalApi.Clients do
   alias FocalApi.Repo
   alias FocalApi.Clients.Client
   alias FocalApi.Accounts
+  alias FocalApi.Clients.Event
 
   def list_clients do
     Repo.all(Client)
@@ -54,6 +55,15 @@ defmodule FocalApi.Clients do
 
   def get_package_by_uuid!(uuid), do: Repo.get_by!(Package, uuid: uuid)
 
+  def get_earliest_shoot_date_by_package(package_uuid) do
+    package = get_package_by_uuid!(package_uuid)
+    query = from event in Event,
+              where: ^package.id == event.package_id,
+              order_by: event.shoot_date,
+              limit: 1
+    Repo.one(query, preload: [:event]).shoot_date
+  end
+
   def create_package(attrs \\ %{}) do
     %Package{}
     |> Package.changeset(attrs)
@@ -74,7 +84,6 @@ defmodule FocalApi.Clients do
     Package.changeset(package, %{})
   end
 
-  alias FocalApi.Clients.Event
 
   def list_events do
     Repo.all(Event)
