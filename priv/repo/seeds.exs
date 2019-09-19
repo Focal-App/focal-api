@@ -23,6 +23,9 @@ alias FocalApi.Repo
 {:ok, date, _} = DateTime.from_iso8601("2020-04-17T14:00:00Z")
 date = date |> DateTime.truncate(:second)
 
+{:ok, date2, _} = DateTime.from_iso8601("2020-08-17T14:00:00Z")
+date2 = date2 |> DateTime.truncate(:second)
+
 francesca = Accounts.get_user_by_email("littlegangwolf@gmail.com")
 
 # Francesca Client 1
@@ -82,10 +85,39 @@ francesca_client_event = %Event{
   shoot_date: date,
   uuid: Ecto.UUID.generate(),
   client_id: francesca_client.id,
-  package_id: francesca_client_package.id
+  package_id: francesca_client_package.id,
+  shoot_time: "6AM - 11AM",
+  shoot_location: "Los Angeles Poppy Fields",
+  edit_image_deadline: date,
+  gallery_link: "http://google.com",
+  blog_link: "http://google.com",
+  wedding_location: nil,
+  reception_location: nil,
+  coordinator_name: nil,
+  notes: "Have clients bring extra flowers and a see through chair.",
 }
 Repo.insert!(francesca_client_event)
 francesca_client_event = Repo.get_by(Event, uuid: francesca_client_event.uuid)
+
+francesca_client_event_3 = %Event{
+  event_name: "Wedding",
+  shoot_date: date2,
+  uuid: Ecto.UUID.generate(),
+  client_id: francesca_client.id,
+  package_id: francesca_client_package.id,
+  shoot_time: "8AM - 11PM",
+  shoot_location: nil,
+  edit_image_deadline: date2,
+  gallery_link: "http://google.com",
+  blog_link: "http://google.com",
+  wedding_location: "Viviana Church in DTLA",
+  reception_location: "Redbird DTLA",
+  coordinator_name: nil,
+  notes: nil,
+}
+Repo.insert!(francesca_client_event_3)
+francesca_client_event_3 = Repo.get_by(Event, uuid: francesca_client_event_3.uuid)
+
 
 francesca_client_task = %Task{
   category: "New Client Inquiry",
@@ -152,7 +184,16 @@ francesca_client_event2 = %Event{
   shoot_date: date,
   uuid: Ecto.UUID.generate(),
   client_id: francesca_client2.id,
-  package_id: francesca_client_package2.id
+  package_id: francesca_client_package2.id,
+  shoot_time: "6AM - 12PM",
+  shoot_location: "Los Angeles Poppy Fields",
+  edit_image_deadline: date,
+  gallery_link: "http://google.com",
+  blog_link: "http://google.com",
+  wedding_location: nil,
+  reception_location: nil,
+  coordinator_name: nil,
+  notes: "Have clients bring extra flowers and a see through chair.",
 }
 Repo.insert!(francesca_client_event2)
 francesca_client_event2 = Repo.get_by(Event, uuid: francesca_client_event2.uuid)
