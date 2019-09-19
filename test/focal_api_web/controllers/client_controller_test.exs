@@ -19,7 +19,7 @@ defmodule FocalApiWeb.ClientControllerTest do
         label: "Client"
       },
       %{
-        first_name: "New Partner name",
+        first_name: nil,
         label: "Partner"
       }
     ],
@@ -159,6 +159,25 @@ defmodule FocalApiWeb.ClientControllerTest do
       assert client.user == user
     end
 
+    test "renders error when data is invalid", %{conn: conn, user: user} do
+      conn = conn
+      |> TestHelpers.valid_session(user)
+      |> post(Routes.client_path(conn, :create), %{
+        contacts: [
+          %{
+            first_name: nil,
+            label: "Partner"
+          },
+          %{
+            first_name: "Tom",
+            label: "Partner"
+          }
+        ]
+      })
+
+      assert json_response(conn, 422)["errors"] == %{"first_name" => ["can't be blank"]}
+    end
+
     test "renders error when user is not logged in", %{conn: conn, user: _user} do
       conn = post(conn, Routes.client_path(conn, :create), @create_attrs)
 
@@ -237,6 +256,28 @@ defmodule FocalApiWeb.ClientControllerTest do
               "uuid" => uuid,
               "user_uuid" => client.user.uuid
              } == json_response(conn, 200)["data"]
+    end
+
+    test "renders error when data is invalid", %{conn: conn, client: %Client{uuid: uuid} = _client} do
+      client = TestHelpers.preloaded_client(uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> put(Routes.client_path(conn, :update, uuid), %{
+        uuid: "7488a646-e31f-11e4-aace-600308960662",
+        contacts: [
+          %{
+            first_name: nil,
+            label: "Partner"
+          },
+          %{
+            first_name: "Tom",
+            label: "Partner"
+          }
+        ]
+      })
+
+      assert json_response(conn, 422)["errors"] == %{"first_name" => ["can't be blank"]}
     end
 
     test "renders error when user is logged in but request is not authenticated", %{conn: conn, client: client, user: _user} do

@@ -30,12 +30,12 @@ defmodule FocalApiWeb.ClientController do
     |> Map.put_new("uuid", Ecto.UUID.generate)
     {:ok, %Client{} = client} = Clients.create_client(create_client_attrs)
 
-    params["contacts"] |> Enum.each(fn contact -> create_contact(contact, client) end)
-
-    conn
-    |> put_status(:created)
-    |> put_resp_header("location", Routes.client_path(conn, :show, client))
-    |> render("show.json", client: client)
+    with {:ok, _contact} <- handle_contact_update_or_create(params["contacts"], client) do
+      conn
+      |> put_status(:created)
+      |> put_resp_header("location", Routes.client_path(conn, :show, client))
+      |> render("show.json", client: client)
+    end
   end
 
   def show(conn, %{"client_uuid" => client_uuid}) do
@@ -53,15 +53,13 @@ defmodule FocalApiWeb.ClientController do
     client_uuid = params["client_uuid"]
     client = Clients.get_client_by_uuid!(client_uuid) |> Repo.preload(:contacts)
 
-    params["contacts"] |> Enum.each(fn contact ->
-      if (Map.has_key?(contact, "uuid")), do: update_contact(contact), else: create_contact(contact, client)
-    end)
+    with {:ok, _contact} <- handle_contact_update_or_create(params["contacts"], client) do
+      update_client_attrs = params
+      |> Map.put("uuid", client_uuid)
 
-    update_client_attrs = params
-    |> Map.put("uuid", client_uuid)
-
-    with {:ok, %Client{} = client} <- Clients.update_client(client, update_client_attrs) do
-      render(conn, "show_all_client_data.json", client: client)
+      with {:ok, %Client{} = client} <- Clients.update_client(client, update_client_attrs) do
+        render(conn, "show_all_client_data.json", client: client)
+      end
     end
   end
 
@@ -86,6 +84,19 @@ defmodule FocalApiWeb.ClientController do
       |> render("403.json")
       |> halt()
     end
+  end
+
+  defp handle_contact_update_or_create(contacts, client) do
+    contacts
+    |> Enum.map(fn contact ->
+      if (Map.has_key?(contact, "uuid")), do: update_contact(contact), else: create_contact(contact, client)
+    end)
+    |> Enum.reduce(fn result, acc ->
+      case result do
+        {:error, _changeset} -> result
+        {:ok, _contact} -> acc
+      end
+    end)
   end
 
   defp create_contact(contact, client) do

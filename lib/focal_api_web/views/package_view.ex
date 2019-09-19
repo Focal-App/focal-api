@@ -27,6 +27,8 @@ defmodule FocalApiWeb.PackageView do
       discount_offered: package.discount_offered,
       balance_remaining: package.balance_remaining,
       balance_received: package.balance_received,
+      wedding_included: package.wedding_included,
+      engagement_included: package.engagement_included,
     }
   end
 
@@ -46,6 +48,8 @@ defmodule FocalApiWeb.PackageView do
       discount_offered: package.discount_offered,
       balance_remaining: package.balance_remaining,
       balance_received: package.balance_received,
+      wedding_included: package.wedding_included,
+      engagement_included: package.engagement_included,
     }
   end
 
