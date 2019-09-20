@@ -4,6 +4,7 @@ defmodule FocalApiWeb.ClientView do
   alias FocalApiWeb.TaskView
   alias FocalApiWeb.PackageView
   alias FocalApiWeb.ContactView
+  alias FocalApiWeb.WorkflowView
   alias FocalApi.Clients.Client
   alias FocalApi.Clients
   alias FocalApi.Repo
@@ -47,6 +48,7 @@ defmodule FocalApiWeb.ClientView do
       user_uuid: user_uuid(client.uuid),
       package: package(client.uuid),
       current_stage: current_stage(client.uuid),
+      workflows: workflows(client.uuid)
     }
   end
 
@@ -100,5 +102,11 @@ defmodule FocalApiWeb.ClientView do
 
   defp client_first_name(client) do
     if (List.first(client.contacts) != nil), do: List.first(client.contacts).first_name, else: nil
+  end
+
+  defp workflows(client_uuid) do
+    client_uuid
+    |> Clients.list_workflows_by_client()
+    |> render_many(WorkflowView, "workflow.json")
   end
 end

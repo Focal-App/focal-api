@@ -159,6 +159,22 @@ defmodule FocalApiWeb.ClientControllerTest do
       assert client.user == user
     end
 
+    test "associates the client with new client workflows and tasks", %{conn: conn, user: user} do
+      conn = conn
+      |> TestHelpers.valid_session(user)
+      |> post(Routes.client_path(conn, :create), @create_attrs)
+
+      assert %{"uuid" => uuid} = json_response(conn, 201)["data"]
+
+      conn = get(conn, Routes.workflow_path(conn, :index_by_client, uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 2
+
+      conn = get(conn, Routes.task_path(conn, :index_by_client, uuid))
+
+      assert length(json_response(conn, 200)["data"]) >= 6
+    end
+
     test "renders error when data is invalid", %{conn: conn, user: user} do
       conn = conn
       |> TestHelpers.valid_session(user)
