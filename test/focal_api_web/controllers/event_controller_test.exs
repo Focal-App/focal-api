@@ -62,7 +62,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.valid_session(client.user)
       |> post(Routes.event_path(conn, :create, package.uuid), @create_attrs)
 
-      assert %{"uuid" => uuid} = json_response(conn, 201)["data"]
+      assert [%{"uuid" => uuid}] = json_response(conn, 200)["data"]
 
       conn = get(conn, Routes.event_path(conn, :show, uuid))
 
@@ -118,7 +118,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.valid_session(client.user)
       |> put(Routes.event_path(conn, :update, uuid), @update_attrs)
 
-      assert %{"uuid" => ^uuid} = json_response(conn, 200)["data"]
+      assert [%{"uuid" => ^uuid}] = json_response(conn, 200)["data"]
 
       conn = get(conn, Routes.event_path(conn, :show, uuid))
 
@@ -174,7 +174,7 @@ defmodule FocalApiWeb.EventControllerTest do
       |> TestHelpers.valid_session(client.user)
       |> delete(Routes.event_path(conn, :delete, event.uuid))
 
-      assert response(conn, 204)
+      assert response(conn, 200)
 
       assert_error_sent 404, fn ->
         get(conn, Routes.event_path(conn, :show, event.uuid))
