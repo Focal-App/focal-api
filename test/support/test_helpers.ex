@@ -9,6 +9,7 @@ defmodule FocalApi.TestHelpers do
   alias FocalApi.Clients.Package
   alias FocalApi.Clients.Event
   alias FocalApi.Clients.Task
+  alias FocalApi.Clients.Workflow
 
   def user_fixture(attrs \\ %{}) do
     params =
@@ -140,6 +141,7 @@ defmodule FocalApi.TestHelpers do
   def task_fixture(attrs \\ %{}) do
     client = client_fixture()
     event = event_fixture(%{ client_id: client.id })
+    workflow = workflow_fixture(%{ client_id: client.id })
 
     params =
       attrs
@@ -149,7 +151,8 @@ defmodule FocalApi.TestHelpers do
         step: "some step",
         uuid: Ecto.UUID.generate(),
         client_id: client.id,
-        event_id: event.id
+        event_id: event.id,
+        workflow_id: workflow.id
       })
 
     {:ok, task} =
@@ -157,6 +160,25 @@ defmodule FocalApi.TestHelpers do
       |> Repo.insert()
 
       task
+  end
+
+  def workflow_fixture(attrs \\ %{}) do
+    client = client_fixture()
+
+    params =
+      attrs
+      |> Enum.into(%{
+        workflow_name: "New Client Inquiry",
+        uuid: Ecto.UUID.generate(),
+        client_id: client.id,
+        order: 0
+      })
+
+    {:ok, workflow} =
+      Workflow.changeset(%Workflow{}, params)
+      |> Repo.insert()
+
+      workflow
   end
 
   def valid_session(conn, user) do
@@ -196,5 +218,13 @@ defmodule FocalApi.TestHelpers do
     |> Clients.get_task_by_uuid!
     |> Repo.preload(:client)
     |> Repo.preload(:event)
+    |> Repo.preload(:workflow)
+  end
+
+  def preloaded_workflow(uuid) do
+    uuid
+    |> Clients.get_workflow_by_uuid!
+    |> Repo.preload(:client)
+    |> Repo.preload(:task)
   end
 end

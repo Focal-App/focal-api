@@ -162,6 +162,22 @@ defmodule FocalApi.Clients do
     Repo.all(query, preload: [:client])
   end
 
+  def list_incomplete_tasks_by_workflow(workflow_uuid) do
+    workflow = get_workflow_by_uuid!(workflow_uuid) |> Repo.preload(:task)
+    query = from task in Task,
+              where: ^workflow.id == task.workflow_id and task.is_completed == false,
+              order_by: task.inserted_at
+    Repo.all(query, preload: [:workflow])
+  end
+
+  def list_completed_tasks_by_workflow(workflow_uuid) do
+    workflow = get_workflow_by_uuid!(workflow_uuid) |> Repo.preload(:task)
+    query = from task in Task,
+              where: ^workflow.id == task.workflow_id and task.is_completed == true,
+              order_by: task.inserted_at
+    Repo.all(query, preload: [:workflow])
+  end
+
   def get_task!(id), do: Repo.get!(Task, id)
 
   def get_task_by_uuid!(uuid), do: Repo.get_by!(Task, uuid: uuid)
@@ -184,5 +200,41 @@ defmodule FocalApi.Clients do
 
   def change_task(%Task{} = task) do
     Task.changeset(task, %{})
+  end
+
+  alias FocalApi.Clients.Workflow
+
+  def list_workflows do
+    Repo.all(Workflow)
+  end
+
+  def list_workflows_by_client(client_uuid) do
+    client = get_client_by_uuid!(client_uuid)
+    query = from workflow in Workflow, where: ^client.id == workflow.client_id, order_by: workflow.order
+    Repo.all(query, preload: [:client])
+  end
+
+  def get_workflow!(id), do: Repo.get!(Workflow, id)
+
+  def get_workflow_by_uuid!(uuid), do: Repo.get_by!(Workflow, uuid: uuid)
+
+  def create_workflow(attrs \\ %{}) do
+    %Workflow{}
+    |> Workflow.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_workflow(%Workflow{} = workflow, attrs) do
+    workflow
+    |> Workflow.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def delete_workflow(%Workflow{} = workflow) do
+    Repo.delete(workflow)
+  end
+
+  def change_workflow(%Workflow{} = workflow) do
+    Workflow.changeset(workflow, %{})
   end
 end
