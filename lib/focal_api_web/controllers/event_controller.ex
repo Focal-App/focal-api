@@ -28,10 +28,14 @@ defmodule FocalApiWeb.EventController do
     |> Map.put_new("uuid", Ecto.UUID.generate)
 
     with {:ok, %Event{} = event} <- Clients.create_event(create_attrs) do
+      package = Clients.get_package!(event.package_id)
+      events = Clients.list_events_by_package(package.uuid)
+
       conn
       |> put_status(:created)
-      |> put_resp_header("location", Routes.event_path(conn, :show, event))
-      |> render("show.json", event: event)
+      |> put_resp_header("location", Routes.event_path(conn, :index_by_package, package.uuid))
+
+      render(conn, "index.json", events: events)
     end
   end
 
@@ -47,7 +51,9 @@ defmodule FocalApiWeb.EventController do
     |> Map.put("uuid", event.uuid)
 
     with {:ok, %Event{} = event} <- Clients.update_event(event, update_attrs) do
-      render(conn, "show.json", event: event)
+      package = Clients.get_package!(event.package_id)
+      events = Clients.list_events_by_package(package.uuid)
+      render(conn, "index.json", events: events)
     end
   end
 
@@ -55,7 +61,9 @@ defmodule FocalApiWeb.EventController do
     event = Clients.get_event_by_uuid!(event_uuid)
 
     with {:ok, %Event{}} <- Clients.delete_event(event) do
-      send_resp(conn, :no_content, "")
+      package = Clients.get_package!(event.package_id)
+      events = Clients.list_events_by_package(package.uuid)
+      render(conn, "index.json", events: events)
     end
   end
 

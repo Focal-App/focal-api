@@ -91,7 +91,7 @@ defmodule FocalApi.Clients do
 
   def list_events_by_package(package_uuid) do
     package = get_package_by_uuid!(package_uuid)
-    query = from event in Event, where: ^package.id == event.package_id
+    query = from event in Event, where: ^package.id == event.package_id, order_by: event.event_name
     Repo.all(query, preload: [:package])
   end
 
