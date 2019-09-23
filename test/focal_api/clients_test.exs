@@ -297,6 +297,26 @@ defmodule FocalApi.ClientsTest do
       assert Clients.list_first_uncompleted_task_by_client(client1.uuid) == [task2]
     end
 
+    test "list_incomplete_tasks_by_workflow/1 returns incomplete tasks by workflow" do
+      workflow = TestHelpers.workflow_fixture()
+
+      _task1 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: true })
+      task2 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: false })
+      _task3 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: true })
+
+      assert Clients.list_incomplete_tasks_by_workflow(workflow.uuid) == [task2]
+    end
+
+    test "list_completed_tasks_by_workflow/1 returns complete tasks by workflow" do
+      workflow = TestHelpers.workflow_fixture()
+
+      task1 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: true })
+      _task2 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: false })
+      task3 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: true })
+
+      assert Clients.list_completed_tasks_by_workflow(workflow.uuid) == [task1, task3]
+    end
+
     test "get_task!/1 returns the task with given id" do
       task = task_fixture()
       assert Clients.get_task!(task.id) == task
@@ -338,6 +358,78 @@ defmodule FocalApi.ClientsTest do
     test "change_task/1 returns a task changeset" do
       task = task_fixture()
       assert %Ecto.Changeset{} = Clients.change_task(task)
+    end
+  end
+
+  describe "workflows" do
+    alias FocalApi.Clients.Workflow
+
+    @valid_attrs %{uuid: "7488a646-e31f-11e4-aace-600308960662", workflow_name: "some workflow_name"}
+    @update_attrs %{uuid: "7488a646-e31f-11e4-aace-600308960668", workflow_name: "some updated workflow_name"}
+    @invalid_attrs %{uuid: nil, workflow_name: nil}
+
+    def workflow_fixture(attrs \\ %{}) do
+      {:ok, workflow} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Clients.create_workflow()
+
+      workflow
+    end
+
+    test "list_workflows/0 returns all workflows" do
+      workflow = workflow_fixture()
+      assert Clients.list_workflows() == [workflow]
+    end
+
+    test "list_workflows_by_client/1 returns all workflows for a client" do
+      client1 = TestHelpers.client_fixture()
+      client2 = TestHelpers.client_fixture()
+
+      workflow1 = TestHelpers.workflow_fixture(%{ client_id: client1.id, order: 0 })
+      _workflow2 = TestHelpers.workflow_fixture(%{ client_id: client2.id, order: 0 })
+      workflow3 = TestHelpers.workflow_fixture(%{ client_id: client1.id, order: 1 })
+
+      assert Clients.list_workflows_by_client(client1.uuid) == [workflow1, workflow3]
+    end
+
+    test "get_workflow!/1 returns the workflow with given id" do
+      workflow = workflow_fixture()
+      assert Clients.get_workflow!(workflow.id) == workflow
+    end
+
+    test "create_workflow/1 with valid data creates a workflow" do
+      assert {:ok, %Workflow{} = workflow} = Clients.create_workflow(@valid_attrs)
+      assert workflow.uuid == "7488a646-e31f-11e4-aace-600308960662"
+      assert workflow.workflow_name == "some workflow_name"
+    end
+
+    test "create_workflow/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Clients.create_workflow(@invalid_attrs)
+    end
+
+    test "update_workflow/2 with valid data updates the workflow" do
+      workflow = workflow_fixture()
+      assert {:ok, %Workflow{} = workflow} = Clients.update_workflow(workflow, @update_attrs)
+      assert workflow.uuid == "7488a646-e31f-11e4-aace-600308960668"
+      assert workflow.workflow_name == "some updated workflow_name"
+    end
+
+    test "update_workflow/2 with invalid data returns error changeset" do
+      workflow = workflow_fixture()
+      assert {:error, %Ecto.Changeset{}} = Clients.update_workflow(workflow, @invalid_attrs)
+      assert workflow == Clients.get_workflow!(workflow.id)
+    end
+
+    test "delete_workflow/1 deletes the workflow" do
+      workflow = workflow_fixture()
+      assert {:ok, %Workflow{}} = Clients.delete_workflow(workflow)
+      assert_raise Ecto.NoResultsError, fn -> Clients.get_workflow!(workflow.id) end
+    end
+
+    test "change_workflow/1 returns a workflow changeset" do
+      workflow = workflow_fixture()
+      assert %Ecto.Changeset{} = Clients.change_workflow(workflow)
     end
   end
 end
