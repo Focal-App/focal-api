@@ -5,7 +5,7 @@ defmodule FocalApiWeb.ClientController do
   alias FocalApi.Clients.Client
   alias FocalApi.Accounts
   alias FocalApi.Repo
-  alias FocalApi.DefaultTasks
+  alias FocalApi.DefaultWorkflows
 
   action_fallback FocalApiWeb.FallbackController
 
@@ -32,7 +32,7 @@ defmodule FocalApiWeb.ClientController do
     {:ok, %Client{} = client} = Clients.create_client(create_client_attrs)
 
     with {:ok, _contact} <- handle_contact_update_or_create(params["contacts"], client) do
-      with {:ok, _workflow} <- DefaultTasks.create_new_client_workflow_and_tasks(client) do
+      with {:ok, _workflow} <- DefaultWorkflows.create_new_client_workflow_and_tasks(client) do
         client = Clients.get_client_by_uuid!(client.uuid)
         conn
         |> put_status(:created)
@@ -47,7 +47,6 @@ defmodule FocalApiWeb.ClientController do
     render(conn, "show.json", client: client)
   end
 
-  @spec show_all_client_data(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show_all_client_data(conn, %{"client_uuid" => client_uuid}) do
     client = Clients.get_client_by_uuid!(client_uuid)
     render(conn, "show_all_client_data.json", client: client)
@@ -115,6 +114,5 @@ defmodule FocalApiWeb.ClientController do
     contact = Map.put(contact, "uuid", original_contact.uuid)
     Accounts.update_contact(original_contact, contact)
   end
-
 
 end

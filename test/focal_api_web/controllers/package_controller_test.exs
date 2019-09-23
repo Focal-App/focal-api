@@ -116,7 +116,55 @@ defmodule FocalApiWeb.PackageControllerTest do
                 "discount_offered" => discount_offered,
                 "balance_remaining" => balance_remaining,
                 "balance_received" => balance_received,
+                "wedding_included" => wedding_included,
+                "engagement_included" => engagement_included,
              } = json_response(conn, 200)["data"]
+    end
+
+    test "associates the client with engagement, wedding and closeout workflows if package includes wedding and engagement", %{conn: conn, client: client} do
+      client = TestHelpers.preloaded_client(client.uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> post(Routes.package_path(conn, :create, client.uuid), %{
+        package_name: "some package_name",
+        uuid: "7488a646-e31f-11e4-aace-600308960662",
+        wedding_included: true,
+        engagement_included: true
+      })
+
+      assert %{"uuid" => uuid} = json_response(conn, 201)["data"]
+
+      conn = get(conn, Routes.workflow_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 3
+
+      conn = get(conn, Routes.task_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 23
+    end
+
+    test "associates the client with engagement and closeout workflows if package includes only engagement", %{conn: conn, client: client} do
+      client = TestHelpers.preloaded_client(client.uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> post(Routes.package_path(conn, :create, client.uuid), %{
+        package_name: "some package_name",
+        uuid: "7488a646-e31f-11e4-aace-600308960662",
+        wedding_included: false,
+        engagement_included: true
+      })
+
+      assert %{"uuid" => uuid} = json_response(conn, 201)["data"]
+
+      conn = get(conn, Routes.workflow_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 2
+
+      conn = get(conn, Routes.task_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 13
     end
 
     test "renders errors when data is invalid", %{conn: conn, client: client} do
@@ -183,6 +231,92 @@ defmodule FocalApiWeb.PackageControllerTest do
                 "balance_remaining" => balance_remaining,
                 "balance_received" => balance_received,
              } = json_response(conn, 200)["data"]
+    end
+
+    test "associates the client with engagement, wedding workflows if package update includes wedding and engagement", %{conn: conn, package: %Package{uuid: uuid} = _package} do
+      package = TestHelpers.preloaded_package(uuid)
+      package_client_uuid = package.client.uuid
+      client = TestHelpers.preloaded_client(package_client_uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> put(Routes.package_path(conn, :update, package.uuid), %{
+        package_name: "some updated package_name",
+        uuid: "7488a646-e31f-11e4-aace-600308960668",
+        wedding_included: true,
+        engagement_included: true
+      })
+
+      assert %{"uuid" => uuid} = json_response(conn, 200)["data"]
+
+      conn = get(conn, Routes.workflow_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 2
+
+      conn = get(conn, Routes.task_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 18
+
+      conn = conn
+      |> put(Routes.package_path(conn, :update, package.uuid), %{
+        package_name: "some updated package_name",
+        uuid: "7488a646-e31f-11e4-aace-600308960668",
+        wedding_included: true,
+        engagement_included: true
+      })
+
+      assert %{"uuid" => uuid} = json_response(conn, 200)["data"]
+
+      conn = get(conn, Routes.workflow_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 2
+
+      conn = get(conn, Routes.task_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 18
+    end
+
+    test "removes client engagement and wedding workflows if package update does not include wedding and engagement", %{conn: conn, package: %Package{uuid: uuid} = _package} do
+      package = TestHelpers.preloaded_package(uuid)
+      package_client_uuid = package.client.uuid
+      client = TestHelpers.preloaded_client(package_client_uuid)
+
+      conn = conn
+      |> TestHelpers.valid_session(client.user)
+      |> put(Routes.package_path(conn, :update, package.uuid), %{
+        package_name: "some updated package_name",
+        uuid: "7488a646-e31f-11e4-aace-600308960668",
+        wedding_included: true,
+        engagement_included: true
+      })
+
+      assert %{"uuid" => uuid} = json_response(conn, 200)["data"]
+
+      conn = get(conn, Routes.workflow_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 2
+
+      conn = get(conn, Routes.task_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 18
+
+      conn = conn
+      |> put(Routes.package_path(conn, :update, package.uuid), %{
+        package_name: "some updated package_name",
+        uuid: "7488a646-e31f-11e4-aace-600308960668",
+        wedding_included: false,
+        engagement_included: false
+      })
+
+      assert %{"uuid" => uuid} = json_response(conn, 200)["data"]
+
+      conn = get(conn, Routes.workflow_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 0
+
+      conn = get(conn, Routes.task_path(conn, :index_by_client, client.uuid))
+
+      assert length(json_response(conn, 200)["data"]) == 0
     end
 
     test "renders errors when data is invalid", %{conn: conn, package: package} do

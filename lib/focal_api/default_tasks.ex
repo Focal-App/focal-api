@@ -1,73 +1,57 @@
 defmodule FocalApi.DefaultTasks do
-  alias FocalApi.Clients
 
-  def create_new_client_workflow_and_tasks(client) do
-    {:ok, new_client_workflow} = Clients.create_workflow(%{
-      uuid: Ecto.UUID.generate(),
-      client_id: client.id,
-      order: 0,
-      workflow_name: "New Client Inquiry",
-    })
-
-    Clients.create_task(%{
-      uuid: Ecto.UUID.generate(),
-      client_id: client.id,
-      workflow_id: new_client_workflow.id,
-      category: "New Client Inquiry",
-      step: "Request More Information",
-      is_completed: false
-    })
-
-    Clients.create_task(%{
-      uuid: Ecto.UUID.generate(),
-      client_id: client.id,
-      workflow_id: new_client_workflow.id,
-      category: "New Client Inquiry",
-      step: "Save Client Information",
-      is_completed: false
-    })
-
-    {:ok, proposal_workflow} = Clients.create_workflow(%{
-      uuid: Ecto.UUID.generate(),
-      client_id: client.id,
-      order: 1,
-      workflow_name: "Proposal & Retainer",
-    })
-
-    Clients.create_task(%{
-      uuid: Ecto.UUID.generate(),
-      client_id: client.id,
-      workflow_id: proposal_workflow.id,
-      category: "Proposal & Retainer",
-      step: "Send Proposal",
-      is_completed: false
-    })
-
-    Clients.create_task(%{
-      uuid: Ecto.UUID.generate(),
-      client_id: client.id,
-      workflow_id: proposal_workflow.id,
-      category: "Proposal & Retainer",
-      step: "Commit To Proposal",
-      is_completed: false
-    })
-
-    Clients.create_task(%{
-      uuid: Ecto.UUID.generate(),
-      client_id: client.id,
-      workflow_id: proposal_workflow.id,
-      category: "Proposal & Retainer",
-      step: "Receive Signed Proposal & Retainer",
-      is_completed: false
-    })
-
-    Clients.create_task(%{
-      uuid: Ecto.UUID.generate(),
-      client_id: client.id,
-      workflow_id: proposal_workflow.id,
-      category: "Proposal & Retainer",
-      step: "Receive Retainer Fee",
-      is_completed: false
-    })
+  def new_client_inquiry_tasks() do
+    [
+      %{ step: "Request More Information" },
+      %{ step: "Save Client Information" },
+    ]
   end
+
+  def proposal_and_retainer_tasks() do
+    [
+      %{ step: "Send Proposal" },
+      %{ step: "Commit To Proposal" },
+      %{ step: "Receive Signed Proposal & Retainer" },
+      %{ step: "Receive Retainer Fee" },
+    ]
+  end
+
+  def engagement_tasks() do
+    [
+      %{ step: "Schedule Shoot Date" },
+      %{ step: "Send 3 Week Pre Shoot Reminder" },
+      %{ step: "Send 1 Week Pre Shoot Reminder" },
+      %{ step: "Complete Shoot" },
+      %{ step: "Send Thank You Email to Client" },
+      %{ step: "Edit Engagement Images" },
+      %{ step: "Share Gallery Link" },
+      %{ step: "Create & Share Blog" },
+    ]
+  end
+
+  def wedding_tasks() do
+    [
+      %{ step: "Schedule Shoot Date" },
+      %{ step: "Send 4 Week Pre-Shoot Final Invoice" },
+      %{ step: "Send 4 Week Pre Shoot Reminder" },
+      %{ step: "Receive Remaining Balance" },
+      %{ step: "Send 1 Week Pre Shoot Reminder" },
+      %{ step: "Complete Shoot" },
+      %{ step: "Send Thank You Email to Client" },
+      %{ step: "Edit Wedding Images" },
+      %{ step: "Share Gallery Link" },
+      %{ step: "Create & Share Blog" },
+    ]
+  end
+
+  def closeout_tasks() do
+    [
+      %{ step: "Request Feedback" },
+      %{ step: "Save & Share Feedback" },
+      %{ step: "Send Out Package Deliverables" },
+      %{ step: "Send Out Gallery Link to Vendors" },
+      %{ step: "Send Out 1 Year Anniversary Email" },
+    ]
+  end
+
 end
