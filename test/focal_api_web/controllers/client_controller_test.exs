@@ -324,7 +324,7 @@ defmodule FocalApiWeb.ClientControllerTest do
       |> TestHelpers.valid_session(client.user)
       |> delete(Routes.client_path(conn, :delete, client.uuid))
 
-      assert response(conn, 204)
+      assert response(conn, 200)
 
       assert_error_sent 404, fn ->
         get(conn, Routes.client_path(conn, :show, client.uuid))

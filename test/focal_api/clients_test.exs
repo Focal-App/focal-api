@@ -317,6 +317,18 @@ defmodule FocalApi.ClientsTest do
       assert Clients.list_completed_tasks_by_workflow(workflow.uuid) == [task1, task3]
     end
 
+    test "list_tasks_by_workflow/1 returns tasks by workflow, in order" do
+      workflow = TestHelpers.workflow_fixture()
+
+      task1 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: true, order: 1 })
+      task2 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: false, order: 0 })
+      task3 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: true, order: 4 })
+      task4 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: true, order: 3 })
+      task5 = TestHelpers.task_fixture(%{ workflow_id: workflow.id, is_completed: false, order: 2 })
+
+      assert Clients.list_tasks_by_workflow(workflow.uuid) == [task2, task1, task5, task4, task3]
+    end
+
     test "get_task!/1 returns the task with given id" do
       task = task_fixture()
       assert Clients.get_task!(task.id) == task

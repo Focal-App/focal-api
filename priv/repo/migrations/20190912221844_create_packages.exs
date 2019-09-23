@@ -5,7 +5,7 @@ defmodule FocalApi.Repo.Migrations.CreatePackages do
     create table(:packages) do
       add :package_name, :string
       add :uuid, :uuid
-      add :client_id, references(:clients)
+      add :client_id, references(:clients, on_delete: :delete_all)
 
       timestamps()
     end

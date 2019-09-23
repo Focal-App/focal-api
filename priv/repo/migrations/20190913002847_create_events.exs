@@ -6,8 +6,8 @@ defmodule FocalApi.Repo.Migrations.CreateEvents do
       add :event_name, :string
       add :shoot_date, :utc_datetime
       add :uuid, :uuid
-      add :client_id, references(:clients)
-      add :package_id, references(:packages)
+      add :client_id, references(:clients, on_delete: :delete_all)
+      add :package_id, references(:packages, on_delete: :delete_all)
 
       timestamps()
     end

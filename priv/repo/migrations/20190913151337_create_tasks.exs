@@ -7,8 +7,8 @@ defmodule FocalApi.Repo.Migrations.CreateTasks do
       add :category, :text
       add :step, :text
       add :is_completed, :boolean, default: false, null: false
-      add :event_id, references(:events, on_delete: :nothing)
-      add :client_id, references(:clients, on_delete: :nothing)
+      add :event_id, references(:events, on_delete: :delete_all)
+      add :client_id, references(:clients, on_delete: :delete_all)
 
       timestamps()
     end

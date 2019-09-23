@@ -17,10 +17,11 @@ defmodule FocalApiWeb.WorkflowView do
     workflow = preloaded_workflow(workflow.uuid)
     completed_tasks = Clients.list_completed_tasks_by_workflow(workflow.uuid)
     incomplete_tasks = Clients.list_incomplete_tasks_by_workflow(workflow.uuid)
+    tasks = Clients.list_tasks_by_workflow(workflow.uuid)
     %{
       uuid: workflow.uuid,
       workflow_name: workflow.workflow_name,
-      tasks: render_many(workflow.task, TaskView, "task.json"),
+      tasks: render_many(tasks, TaskView, "task.json"),
       completed_tasks: length(completed_tasks),
       incomplete_tasks: length(incomplete_tasks),
       order: workflow.order
