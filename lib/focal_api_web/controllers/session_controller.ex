@@ -28,7 +28,8 @@ defmodule FocalApiWeb.SessionController do
   def delete(conn, _params) do
     conn
     |> configure_session(drop: true)
-    |> Plug.Conn.send_resp(201, "No Content")
+    |> put_view(FocalApiWeb.DefaultView)
+    |> render("show.json", value: "Ok")
   end
 
   defp user_params(auth, provider) do

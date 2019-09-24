@@ -143,13 +143,13 @@ defmodule FocalApi.Clients do
 
   def list_tasks_by_event(event_uuid) do
     event = get_event_by_uuid!(event_uuid)
-    query = from task in Task, where: ^event.id == task.event_id
+    query = from task in Task, where: ^event.id == task.event_id, order_by: task.order
     Repo.all(query, preload: [:event])
   end
 
   def list_tasks_by_client(client_uuid) do
     client = get_client_by_uuid!(client_uuid)
-    query = from task in Task, where: ^client.id == task.client_id
+    query = from task in Task, where: ^client.id == task.client_id, order_by: task.order
     Repo.all(query, preload: [:client])
   end
 
@@ -157,7 +157,7 @@ defmodule FocalApi.Clients do
     client = get_client_by_uuid!(client_uuid)
     query = from task in Task,
               where: ^client.id == task.client_id and task.is_completed == false,
-              order_by: task.inserted_at,
+              order_by: task.order,
               limit: 1
     Repo.all(query, preload: [:client])
   end
@@ -165,16 +165,22 @@ defmodule FocalApi.Clients do
   def list_incomplete_tasks_by_workflow(workflow_uuid) do
     workflow = get_workflow_by_uuid!(workflow_uuid) |> Repo.preload(:task)
     query = from task in Task,
-              where: ^workflow.id == task.workflow_id and task.is_completed == false,
-              order_by: task.inserted_at
+              where: ^workflow.id == task.workflow_id and task.is_completed == false
     Repo.all(query, preload: [:workflow])
   end
 
   def list_completed_tasks_by_workflow(workflow_uuid) do
     workflow = get_workflow_by_uuid!(workflow_uuid) |> Repo.preload(:task)
     query = from task in Task,
-              where: ^workflow.id == task.workflow_id and task.is_completed == true,
-              order_by: task.inserted_at
+              where: ^workflow.id == task.workflow_id and task.is_completed == true
+    Repo.all(query, preload: [:workflow])
+  end
+
+  def list_tasks_by_workflow(workflow_uuid) do
+    workflow = get_workflow_by_uuid!(workflow_uuid) |> Repo.preload(:task)
+    query = from task in Task,
+              where: ^workflow.id == task.workflow_id,
+              order_by: task.order
     Repo.all(query, preload: [:workflow])
   end
 

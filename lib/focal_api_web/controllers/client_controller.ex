@@ -70,7 +70,9 @@ defmodule FocalApiWeb.ClientController do
     client = Clients.get_client_by_uuid!(client_uuid)
 
     with {:ok, %Client{}} <- Clients.delete_client(client) do
-      send_resp(conn, :no_content, "")
+      conn
+      |> put_view(FocalApiWeb.DefaultView)
+      |> render("show.json", value: "Ok")
     end
   end
 

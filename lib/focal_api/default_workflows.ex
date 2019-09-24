@@ -82,7 +82,8 @@ defmodule FocalApi.DefaultWorkflows do
         workflow_id: workflow_id,
         category: category_name,
         step: task.step,
-        is_completed: false
+        is_completed: false,
+        order: task.order
       })
     end)
     |> handle_results()

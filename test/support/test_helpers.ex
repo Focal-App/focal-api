@@ -152,7 +152,8 @@ defmodule FocalApi.TestHelpers do
         uuid: Ecto.UUID.generate(),
         client_id: client.id,
         event_id: event.id,
-        workflow_id: workflow.id
+        workflow_id: workflow.id,
+        order: 0
       })
 
     {:ok, task} =

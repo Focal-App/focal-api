@@ -9,7 +9,7 @@ defmodule FocalApi.Clients.Task do
     field :category, :string
     field :is_completed, :boolean, default: false
     field :step, :string
-
+    field :order, :integer
     field :uuid, Ecto.UUID
     belongs_to :event, Event
     belongs_to :client, Client
@@ -21,7 +21,7 @@ defmodule FocalApi.Clients.Task do
   @doc false
   def changeset(task, attrs) do
     task
-    |> cast(attrs, [:uuid, :category, :step, :is_completed, :event_id, :client_id, :workflow_id])
+    |> cast(attrs, [:uuid, :category, :step, :is_completed, :event_id, :client_id, :workflow_id, :order])
     |> validate_required([:uuid, :category, :step, :is_completed])
   end
 end
