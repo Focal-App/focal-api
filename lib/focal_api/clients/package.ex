@@ -43,5 +43,6 @@ defmodule FocalApi.Clients.Package do
       :client_id
       ])
     |> validate_required([:package_name, :uuid])
+    |> validate_number(:package_price, greater_than: 100, message: "must be greater than $1.00")
   end
 end
