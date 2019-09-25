@@ -11,7 +11,7 @@ defmodule FocalApiWeb.ClientController do
 
   plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index_by_user, :show, :show_all_client_data]
   plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID when action in [:update, :delete, :show, :show_all_client_data]
-  plug :authorize_user_by_user_uuid when action in [:index_by_user]
+  plug FocalApiWeb.Plugs.AuthorizeUserByUserUUID when action in [:index_by_user]
 
   def index_by_user(conn, %{"user_uuid" => user_uuid}) do
     clients = Clients.list_clients_by_user(user_uuid)
@@ -73,21 +73,6 @@ defmodule FocalApiWeb.ClientController do
       conn
       |> put_view(FocalApiWeb.DefaultView)
       |> render("show.json", value: "Ok")
-    end
-  end
-
-  defp authorize_user_by_user_uuid(conn, _params) do
-    requested_users_uuid = conn.params["user_uuid"]
-    current_user = conn.assigns[:user]
-
-    if current_user != nil && requested_users_uuid == current_user.uuid do
-      conn
-    else
-      conn
-      |> put_status(:forbidden)
-      |> put_view(FocalApiWeb.ErrorView)
-      |> render("403.json")
-      |> halt()
     end
   end
 
