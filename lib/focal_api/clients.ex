@@ -6,6 +6,9 @@ defmodule FocalApi.Clients do
   alias FocalApi.Clients.Event
   alias FocalApi.EventName
   alias FocalApi.DefaultWorkflows
+  alias FocalApi.Clients.Package
+  alias FocalApi.Clients.Task
+  alias FocalApi.Clients.Workflow
 
   def list_clients do
     Repo.all(Client)
@@ -40,8 +43,6 @@ defmodule FocalApi.Clients do
   def change_client(%Client{} = client) do
     Client.changeset(client, %{})
   end
-
-  alias FocalApi.Clients.Package
 
   def list_packages do
     Repo.all(Package)
@@ -86,14 +87,13 @@ defmodule FocalApi.Clients do
     Package.changeset(package, %{})
   end
 
-
   def list_events do
     Repo.all(Event)
   end
 
   def list_events_by_package(package_uuid) do
     package = get_package_by_uuid!(package_uuid)
-    query = from event in Event, where: ^package.id == event.package_id, order_by: event.event_name
+    query = from event in Event, where: ^package.id == event.package_id, order_by: event.shoot_date
     Repo.all(query, preload: [:package])
   end
 
@@ -136,8 +136,6 @@ defmodule FocalApi.Clients do
   def change_event(%Event{} = event) do
     Event.changeset(event, %{})
   end
-
-  alias FocalApi.Clients.Task
 
   def list_tasks do
     Repo.all(Task)
@@ -209,8 +207,6 @@ defmodule FocalApi.Clients do
   def change_task(%Task{} = task) do
     Task.changeset(task, %{})
   end
-
-  alias FocalApi.Clients.Workflow
 
   def list_workflows do
     Repo.all(Workflow)
