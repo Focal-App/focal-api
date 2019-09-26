@@ -44,11 +44,12 @@ defmodule FocalApi.TestHelpers do
       Client.changeset(%Client{}, params)
       |> Repo.insert()
 
-    _contact = contact_fixture(%{ client_id: client.id })
     client
   end
 
   def contact_fixture(attrs \\ %{}) do
+    client = client_fixture()
+
     params =
       attrs
       |> Enum.into(%{
@@ -59,6 +60,7 @@ defmodule FocalApi.TestHelpers do
         last_name: "some last_name",
         phone_number: "some phone_number",
         uuid: Ecto.UUID.generate(),
+        client_id: client.id,
       })
 
     {:ok, contact} =

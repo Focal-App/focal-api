@@ -8,6 +8,7 @@ defmodule FocalApiWeb.ClientView do
   alias FocalApi.Clients.Client
   alias FocalApi.Clients
   alias FocalApi.Repo
+  alias FocalApi.Accounts
 
   def render("index.json", %{clients: clients}) do
     %{data: render_many(clients, ClientView, "client.json")}
@@ -31,8 +32,9 @@ defmodule FocalApiWeb.ClientView do
 
   def render("client.json", %{client: client}) do
     client = preloaded_client(client.uuid)
+    contacts = Accounts.list_contacts_by_client(client.uuid)
     %{
-      contacts: render_many(client.contacts, ContactView, "contact.json"),
+      contacts: render_many(contacts, ContactView, "contact.json"),
       private_notes: client.private_notes,
       uuid: client.uuid,
       user_uuid: user_uuid(client.uuid)
@@ -41,8 +43,9 @@ defmodule FocalApiWeb.ClientView do
 
   def render("all_client_data.json", %{client: client}) do
     client = preloaded_client(client.uuid)
+    contacts = Accounts.list_contacts_by_client(client.uuid)
     %{
-      contacts: render_many(client.contacts, ContactView, "contact.json"),
+      contacts: render_many(contacts, ContactView, "contact.json"),
       private_notes: client.private_notes,
       uuid: client.uuid,
       user_uuid: user_uuid(client.uuid),
@@ -55,9 +58,10 @@ defmodule FocalApiWeb.ClientView do
   def render("partial_client_data.json", %{client: client}) do
     client = preloaded_client(client.uuid)
     package = package(client.uuid)
+    contacts = Accounts.list_contacts_by_client(client.uuid)
     %{
-      client_first_name: client_first_name(client),
-      partner_first_name: partner_first_name(client),
+      client_first_name: client_first_name(contacts),
+      partner_first_name: partner_first_name(contacts),
       package_name: package_name(package),
       upcoming_shoot_date: upcoming_shoot_date(package),
       current_stage: current_stage(client.uuid),
@@ -96,12 +100,12 @@ defmodule FocalApiWeb.ClientView do
     if (length(first_uncompleted_task) == 0), do: %{}, else: render_one(Enum.at(first_uncompleted_task, 0), TaskView, "task.json")
   end
 
-  defp partner_first_name(client) do
-    if (length(client.contacts) > 1), do: Enum.at(client.contacts, 1).first_name, else: nil
+  defp partner_first_name(contacts) do
+    if (length(contacts) > 1), do: Enum.at(contacts, 1).first_name, else: nil
   end
 
-  defp client_first_name(client) do
-    if (List.first(client.contacts) != nil), do: List.first(client.contacts).first_name, else: nil
+  defp client_first_name(contacts) do
+    if (List.first(contacts) != nil), do: List.first(contacts).first_name, else: nil
   end
 
   defp workflows(client_uuid) do

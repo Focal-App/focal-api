@@ -88,6 +88,17 @@ defmodule FocalApi.AccountsTest do
       assert Accounts.list_contacts() == [contact]
     end
 
+    test "list_contacts_by_client/1 returns all contacts for a client" do
+      client1 = TestHelpers.client_fixture()
+      client2 = TestHelpers.client_fixture()
+
+      contact1 = TestHelpers.contact_fixture(%{ client_id: client1.id })
+      _contact2 = TestHelpers.contact_fixture(%{ client_id: client2.id })
+      contact3 = TestHelpers.contact_fixture(%{ client_id: client1.id })
+
+      assert Accounts.list_contacts_by_client(client1.uuid) == [contact1, contact3]
+    end
+
     test "get_contact!/1 returns the contact with given id" do
       contact = TestHelpers.contact_fixture()
       assert Accounts.get_contact!(contact.id) == contact

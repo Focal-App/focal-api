@@ -212,7 +212,8 @@ defmodule FocalApiWeb.ClientControllerTest do
   describe "update client" do
     setup [:create_client, :create_user]
 
-    test "renders client when data is valid", %{conn: conn, client: %Client{uuid: uuid} = _client} do
+    test "renders client when data is valid", %{conn: conn, client: %Client{uuid: uuid, id: id} = _client} do
+      contact = TestHelpers.contact_fixture(%{ client_id: id })
       client = TestHelpers.preloaded_client(uuid)
       first_client_contact = List.first(client.contacts).uuid
 
@@ -351,6 +352,7 @@ defmodule FocalApiWeb.ClientControllerTest do
   describe "index_by_user" do
     setup [:create_client, :create_user]
     test "lists all clients for a user", %{conn: conn, client: client} do
+      contact = TestHelpers.contact_fixture(%{ client_id: client.id })
       client = TestHelpers.preloaded_client(client.uuid)
       contact_uuid = List.first(client.contacts).uuid
       user_uuid = client.user.uuid
