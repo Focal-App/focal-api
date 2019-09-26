@@ -3,14 +3,12 @@ defmodule FocalApiWeb.WorkflowController do
 
   alias FocalApi.Clients
   alias FocalApi.Clients.Workflow
-  alias FocalApi.Repo
-  alias FocalApi.Accounts
 
   action_fallback FocalApiWeb.FallbackController
 
   plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index_by_client, :show]
   plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID when action in [:create, :index_by_client]
-  plug :authorize_user_by_workflow_uuid when action in [:update, :delete, :show]
+  plug FocalApiWeb.Plugs.AuthorizeUserByWorkflowUUID when action in [:update, :delete, :show]
 
   def index_by_client(conn, _params) do
     workflows = Clients.list_workflows_by_client(conn.params["client_uuid"])
@@ -53,26 +51,6 @@ defmodule FocalApiWeb.WorkflowController do
 
     with {:ok, %Workflow{}} <- Clients.delete_workflow(workflow) do
       send_resp(conn, :no_content, "")
-    end
-  end
-
-  defp authorize_user_by_workflow_uuid(conn, _params) do
-    workflow = conn.params["workflow_uuid"]
-    |> Clients.get_workflow_by_uuid!
-    |> Repo.preload(:client)
-
-    workflows_user = Accounts.get_user!(workflow.client.user_id)
-
-    current_user = conn.assigns[:user]
-
-    if current_user != nil && workflows_user.uuid == current_user.uuid do
-      conn
-    else
-      conn
-      |> put_status(:forbidden)
-      |> put_view(FocalApiWeb.ErrorView)
-      |> render("403.json")
-      |> halt()
     end
   end
 end

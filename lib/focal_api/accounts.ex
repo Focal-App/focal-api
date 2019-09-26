@@ -1,7 +1,7 @@
 defmodule FocalApi.Accounts do
   import Ecto.Query, warn: false
   alias FocalApi.Repo
-
+  alias FocalApi.Clients
   alias FocalApi.Accounts.User
 
   def list_users do
@@ -38,6 +38,14 @@ defmodule FocalApi.Accounts do
 
   def list_contacts do
     Repo.all(Contact)
+  end
+
+  def list_contacts_by_client(client_uuid) do
+    client = Clients.get_client_by_uuid!(client_uuid)
+    query = from contact in Contact,
+              where: ^client.id == contact.client_id,
+              order_by: contact.inserted_at
+    Repo.all(query, preload: [:contacts])
   end
 
   def get_contact!(id), do: Repo.get!(Contact, id)

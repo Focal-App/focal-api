@@ -4,6 +4,11 @@ defmodule FocalApi.Clients do
   alias FocalApi.Clients.Client
   alias FocalApi.Accounts
   alias FocalApi.Clients.Event
+  alias FocalApi.EventName
+  alias FocalApi.DefaultWorkflows
+  alias FocalApi.Clients.Package
+  alias FocalApi.Clients.Task
+  alias FocalApi.Clients.Workflow
 
   def list_clients do
     Repo.all(Client)
@@ -38,8 +43,6 @@ defmodule FocalApi.Clients do
   def change_client(%Client{} = client) do
     Client.changeset(client, %{})
   end
-
-  alias FocalApi.Clients.Package
 
   def list_packages do
     Repo.all(Package)
@@ -84,14 +87,13 @@ defmodule FocalApi.Clients do
     Package.changeset(package, %{})
   end
 
-
   def list_events do
     Repo.all(Event)
   end
 
   def list_events_by_package(package_uuid) do
     package = get_package_by_uuid!(package_uuid)
-    query = from event in Event, where: ^package.id == event.package_id, order_by: event.event_name
+    query = from event in Event, where: ^package.id == event.package_id, order_by: event.shoot_date
     Repo.all(query, preload: [:package])
   end
 
@@ -134,8 +136,6 @@ defmodule FocalApi.Clients do
   def change_event(%Event{} = event) do
     Event.changeset(event, %{})
   end
-
-  alias FocalApi.Clients.Task
 
   def list_tasks do
     Repo.all(Task)
@@ -208,8 +208,6 @@ defmodule FocalApi.Clients do
     Task.changeset(task, %{})
   end
 
-  alias FocalApi.Clients.Workflow
-
   def list_workflows do
     Repo.all(Workflow)
   end
@@ -242,5 +240,60 @@ defmodule FocalApi.Clients do
 
   def change_workflow(%Workflow{} = workflow) do
     Workflow.changeset(workflow, %{})
+  end
+
+  def handle_engagement_and_wedding_updates(package) do
+    client = get_client!(package.client_id)
+    events = list_events_by_package(package.uuid)
+    workflows = list_workflows_by_client(client.uuid)
+    workflow_has_engagement = workflows_include(workflows, EventName.engagement())
+    workflow_has_wedding = workflows_include(workflows, EventName.wedding())
+
+    if include_engagement?(package, workflow_has_engagement), do: DefaultWorkflows.create_engagement_workflow_and_tasks(client, 2)
+    if include_wedding?(package, workflow_has_wedding), do: DefaultWorkflows.create_wedding_workflow_and_tasks(client, 3)
+    if remove_engagement?(package, workflow_has_engagement), do: delete_workflow_and_event(workflows, events, EventName.engagement())
+    if remove_wedding?(package, workflow_has_wedding), do: delete_workflow_and_event(workflows, events, EventName.wedding())
+  end
+
+  defp workflows_include(workflows, workflow_name) do
+    workflows
+    |> Enum.any?(fn workflow -> workflow.workflow_name == workflow_name end)
+  end
+
+  defp include_engagement?(package, workflow_has_engagement) do
+    package.engagement_included == true && !workflow_has_engagement
+  end
+
+  defp include_wedding?(package, workflow_has_wedding) do
+    package.wedding_included == true && !workflow_has_wedding
+  end
+
+  defp remove_engagement?(package, workflow_has_engagement) do
+    package.engagement_included == false && workflow_has_engagement
+  end
+
+  defp remove_wedding?(package, workflow_has_wedding) do
+    package.wedding_included == false && workflow_has_wedding
+  end
+
+  defp delete_workflow_and_event(workflows, events, name) do
+    delete_workflow_by_name(workflows, name)
+    delete_event_by_name(events, name)
+  end
+
+  defp delete_workflow_by_name(workflows, workflow_name) do
+    workflows
+    |> Enum.find(fn workflow -> workflow.workflow_name == workflow_name end)
+    |> delete_workflow()
+  end
+
+  defp delete_event_by_name(events, event_name) do
+    event = events
+    |> Enum.find(fn event -> event.event_name == event_name end)
+
+    if (event != nil) do
+      event
+      |> delete_event()
+    end
   end
 end
