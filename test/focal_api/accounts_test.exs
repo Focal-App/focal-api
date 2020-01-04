@@ -7,9 +7,31 @@ defmodule FocalApi.AccountsTest do
   describe "users" do
     alias FocalApi.Accounts.User
 
-    @valid_attrs %{avatar: "some avatar", email: "some email", first_name: "some first_name", provider: "some provider", uuid: "7488a646-e31f-11e4-aace-600308960662"}
-    @update_attrs %{avatar: "some updated avatar", email: "some updated email", first_name: "some updated first_name", provider: "some updated provider", uuid: "7488a646-e31f-11e4-aace-600308960668"}
-    @invalid_attrs %{avatar: nil, email: nil, first_name: nil, provider: nil, uuid: nil}
+    @valid_attrs %{
+      avatar: "some avatar",
+      email: "some email",
+      first_name: "some first_name",
+      provider: "some provider",
+      uuid: "7488a646-e31f-11e4-aace-600308960662",
+      google_id: "1234",
+      google_refresh_token: "1234"
+    }
+    @update_attrs %{
+      avatar: "some updated avatar",
+      email: "some updated email",
+      first_name: "some updated first_name",
+      provider: "some updated provider",
+      uuid: "7488a646-e31f-11e4-aace-600308960668",
+      google_id: "1234",
+      google_refresh_token: "1234"
+    }
+    @invalid_attrs %{
+      avatar: nil,
+      email: nil,
+      first_name: nil,
+      provider: nil,
+      uuid: nil
+    }
 
     def user_fixture(attrs \\ %{}) do
       {:ok, user} =
@@ -79,9 +101,33 @@ defmodule FocalApi.AccountsTest do
   describe "contacts" do
     alias FocalApi.Accounts.Contact
 
-    @valid_attrs %{best_time_to_contact: "some best_time_to_contact", email: "some@email", first_name: "some first_name", label: "some label", last_name: "some last_name", phone_number: "some phone_number", uuid: "7488a646-e31f-11e4-aace-600308960662"}
-    @update_attrs %{best_time_to_contact: "some updated best_time_to_contact", email: "some@updated email", first_name: "some updated first_name", label: "some updated label", last_name: "some updated last_name", phone_number: "some updated phone_number", uuid: "7488a646-e31f-11e4-aace-600308960668"}
-    @invalid_attrs %{best_time_to_contact: nil, email: nil, first_name: nil, label: nil, last_name: nil, phone_number: nil, uuid: nil}
+    @valid_attrs %{
+      best_time_to_contact: "some best_time_to_contact",
+      email: "some@email",
+      first_name: "some first_name",
+      label: "some label",
+      last_name: "some last_name",
+      phone_number: "some phone_number",
+      uuid: "7488a646-e31f-11e4-aace-600308960662"
+    }
+    @update_attrs %{
+      best_time_to_contact: "some updated best_time_to_contact",
+      email: "some@updated email",
+      first_name: "some updated first_name",
+      label: "some updated label",
+      last_name: "some updated last_name",
+      phone_number: "some updated phone_number",
+      uuid: "7488a646-e31f-11e4-aace-600308960668"
+    }
+    @invalid_attrs %{
+      best_time_to_contact: nil,
+      email: nil,
+      first_name: nil,
+      label: nil,
+      last_name: nil,
+      phone_number: nil,
+      uuid: nil
+    }
 
     test "list_contacts/0 returns all contacts" do
       contact = TestHelpers.contact_fixture()
@@ -92,9 +138,9 @@ defmodule FocalApi.AccountsTest do
       client1 = TestHelpers.client_fixture()
       client2 = TestHelpers.client_fixture()
 
-      contact1 = TestHelpers.contact_fixture(%{ client_id: client1.id })
-      _contact2 = TestHelpers.contact_fixture(%{ client_id: client2.id })
-      contact3 = TestHelpers.contact_fixture(%{ client_id: client1.id })
+      contact1 = TestHelpers.contact_fixture(%{client_id: client1.id})
+      _contact2 = TestHelpers.contact_fixture(%{client_id: client2.id})
+      contact3 = TestHelpers.contact_fixture(%{client_id: client1.id})
 
       assert Accounts.list_contacts_by_client(client1.uuid) == [contact1, contact3]
     end

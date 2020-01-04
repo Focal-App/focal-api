@@ -20,7 +20,7 @@ defmodule FocalApi.MixProject do
   def application do
     [
       mod: {FocalApi.Application, []},
-      extra_applications: [:logger, :runtime_tools, :ueberauth, :ueberauth_google]
+      extra_applications: [:logger, :runtime_tools, :ueberauth, :ueberauth_google, :tesla]
     ]
   end
 
@@ -39,13 +39,14 @@ defmodule FocalApi.MixProject do
       {:ecto_sql, "~> 3.1"},
       {:postgrex, ">= 0.0.0"},
       {:gettext, "~> 0.11"},
-      {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:ueberauth, "~> 0.5"},
       {:ueberauth_google, "~> 0.7"},
       {:cors_plug, "~> 2.0"},
       {:poison, "~> 3.1"},
+      {:tesla, "~> 1.3.0"},
       {:hackney, "~> 1.15.2"},
+      {:jason, ">= 1.0.0"}
     ]
   end
 

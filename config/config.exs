@@ -23,13 +23,20 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+config :tesla, adapter: Tesla.Adapter.Hackney
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
 # Configure Google OAuth:
 config :ueberauth, Ueberauth,
   providers: [
-    google: {Ueberauth.Strategy.Google, [default_scope: "email profile plus.me"]}
+    google:
+      {Ueberauth.Strategy.Google,
+       [
+         access_type: "offline",
+         default_scope: "email profile plus.me gmail.compose gmail.readonly"
+       ]}
   ]
 
 config :ueberauth, Ueberauth.Strategy.Google.OAuth,

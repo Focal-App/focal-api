@@ -20,6 +20,9 @@ defmodule FocalApi.TestHelpers do
         first_name: "Test User",
         provider: "google",
         uuid: Ecto.UUID.generate(),
+        google_id: "1234",
+        google_refresh_token: "1234",
+        google_access_token: "1234"
       })
 
     {:ok, user} =
@@ -37,7 +40,7 @@ defmodule FocalApi.TestHelpers do
       |> Enum.into(%{
         private_notes: nil,
         uuid: Ecto.UUID.generate(),
-        user_id: user.id,
+        user_id: user.id
       })
 
     {:ok, client} =
@@ -60,14 +63,14 @@ defmodule FocalApi.TestHelpers do
         last_name: "some last_name",
         phone_number: "some phone_number",
         uuid: Ecto.UUID.generate(),
-        client_id: client.id,
+        client_id: client.id
       })
 
     {:ok, contact} =
       Contact.changeset(%Contact{}, params)
       |> Repo.insert()
 
-      contact
+    contact
   end
 
   def package_fixture(attrs \\ %{}) do
@@ -90,30 +93,31 @@ defmodule FocalApi.TestHelpers do
         Private Online Gallery of All Images for Friends and Family
 
         Seven Hundred+ Digital Negatives on a Custom USB Drive),
-        package_price: 500000,
-        retainer_price: 100000,
+        package_price: 500_000,
+        retainer_price: 100_000,
         retainer_paid_amount: 0,
         retainer_paid: false,
         discount_offered: 0,
-        balance_remaining: 500000,
+        balance_remaining: 500_000,
         balance_received: false,
         uuid: Ecto.UUID.generate(),
         client_id: client.id,
         wedding_included: true,
-        engagement_included: true,
+        engagement_included: true
       })
 
     {:ok, package} =
       Package.changeset(%Package{}, params)
       |> Repo.insert()
 
-      package
+    package
   end
 
   def event_fixture(attrs \\ %{}) do
     client = client_fixture()
-    package = package_fixture(%{ client_id: client.id })
+    package = package_fixture(%{client_id: client.id})
     {:ok, date1, _} = DateTime.from_iso8601("2010-04-17T14:00:00Z")
+
     params =
       attrs
       |> Enum.into(%{
@@ -130,20 +134,20 @@ defmodule FocalApi.TestHelpers do
         wedding_location: nil,
         reception_location: nil,
         coordinator_name: nil,
-        notes: "Have clients bring extra flowers and a see through chair.",
+        notes: "Have clients bring extra flowers and a see through chair."
       })
 
     {:ok, event} =
       Event.changeset(%Event{}, params)
       |> Repo.insert()
 
-      event
+    event
   end
 
   def task_fixture(attrs \\ %{}) do
     client = client_fixture()
-    event = event_fixture(%{ client_id: client.id })
-    workflow = workflow_fixture(%{ client_id: client.id })
+    event = event_fixture(%{client_id: client.id})
+    workflow = workflow_fixture(%{client_id: client.id})
 
     params =
       attrs
@@ -162,7 +166,7 @@ defmodule FocalApi.TestHelpers do
       Task.changeset(%Task{}, params)
       |> Repo.insert()
 
-      task
+    task
   end
 
   def workflow_fixture(attrs \\ %{}) do
@@ -181,7 +185,7 @@ defmodule FocalApi.TestHelpers do
       Workflow.changeset(%Workflow{}, params)
       |> Repo.insert()
 
-      workflow
+    workflow
   end
 
   def valid_session(conn, user) do
@@ -189,7 +193,7 @@ defmodule FocalApi.TestHelpers do
     |> assign(:user, user)
     |> init_test_session(id: "test_id_token")
     |> put_session(:user_uuid, user.uuid)
-    |> put_resp_cookie("session_id", "test_id_token", [http_only: true, secure: false])
+    |> put_resp_cookie("session_id", "test_id_token", http_only: true, secure: false)
   end
 
   def invalid_session(conn, id_token) do
@@ -198,27 +202,27 @@ defmodule FocalApi.TestHelpers do
 
   def preloaded_package(uuid) do
     uuid
-    |> Clients.get_package_by_uuid!
+    |> Clients.get_package_by_uuid!()
     |> Repo.preload(:client)
   end
 
   def preloaded_client(uuid) do
     uuid
-    |> Clients.get_client_by_uuid!
+    |> Clients.get_client_by_uuid!()
     |> Repo.preload(:user)
     |> Repo.preload(:contacts)
   end
 
   def preloaded_event(uuid) do
     uuid
-    |> Clients.get_event_by_uuid!
+    |> Clients.get_event_by_uuid!()
     |> Repo.preload(:client)
     |> Repo.preload(:package)
   end
 
   def preloaded_task(uuid) do
     uuid
-    |> Clients.get_task_by_uuid!
+    |> Clients.get_task_by_uuid!()
     |> Repo.preload(:client)
     |> Repo.preload(:event)
     |> Repo.preload(:workflow)
@@ -226,7 +230,7 @@ defmodule FocalApi.TestHelpers do
 
   def preloaded_workflow(uuid) do
     uuid
-    |> Clients.get_workflow_by_uuid!
+    |> Clients.get_workflow_by_uuid!()
     |> Repo.preload(:client)
     |> Repo.preload(:task)
   end

@@ -16,3 +16,5 @@ config :focal_api, FocalApiWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+config :tesla, adapter: Tesla.Mock

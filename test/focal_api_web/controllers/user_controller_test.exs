@@ -11,9 +11,19 @@ defmodule FocalApiWeb.UserControllerTest do
     first_name: "some first_name",
     provider: "some provider",
     uuid: "7488a646-e31f-11e4-aace-600308960662",
-    id: @id
+    id: @id,
+    google_id: "1234",
+    google_refresh_token: "1234"
   }
-  @invalid_attrs %{avatar: nil, email: nil, first_name: nil, provider: nil, uuid: nil}
+  @invalid_attrs %{
+    avatar: nil,
+    email: nil,
+    first_name: nil,
+    provider: nil,
+    uuid: nil,
+    google_id: nil,
+    google_refresh_token: nil
+  }
 
   def fixture(:user) do
     {:ok, user} = Accounts.create_user(@create_attrs)
@@ -26,15 +36,17 @@ defmodule FocalApiWeb.UserControllerTest do
 
   describe "show" do
     setup [:create_user]
+
     test "shows a users", %{conn: conn, user: %User{uuid: uuid} = _user} do
       conn = get(conn, Routes.user_path(conn, :show, uuid))
+
       assert json_response(conn, 200)["data"] == %{
-        "avatar" => "some avatar",
-        "email" => "some email",
-        "first_name" => "some first_name",
-        "provider" => "some provider",
-        "uuid" => "7488a646-e31f-11e4-aace-600308960662"
-      }
+               "avatar" => "some avatar",
+               "email" => "some email",
+               "first_name" => "some first_name",
+               "provider" => "some provider",
+               "uuid" => "7488a646-e31f-11e4-aace-600308960662"
+             }
     end
   end
 
