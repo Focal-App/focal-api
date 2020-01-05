@@ -35,7 +35,9 @@ config :ueberauth, Ueberauth,
       {Ueberauth.Strategy.Google,
        [
          access_type: "offline",
-         default_scope: "email profile plus.me gmail.compose gmail.readonly"
+         default_scope:
+           "email profile https://www.googleapis.com/auth/gmail.compose https://www.googleapis.com/auth/gmail.readonly https://mail.google.com/",
+         prompt: "select_account"
        ]}
   ]
 

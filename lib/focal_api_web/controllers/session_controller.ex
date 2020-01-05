@@ -60,21 +60,7 @@ defmodule FocalApiWeb.SessionController do
         Repo.insert(changeset)
 
       user ->
-        {:ok, update_user(user, changeset, user_params)}
-    end
-  end
-
-  defp update_user(user, changeset, user_params) do
-    if user.google_refresh_token == nil && changeset.changes.google_refresh_token do
-      user_params =
-        user_params
-        |> Map.put("uuid", user.uuid)
-        |> Map.put("google_refresh_token", changeset.changes.google_refresh_token)
-
-      User.changeset(%User{}, user_params)
-      |> Repo.insert()
-    else
-      user
+        User.changeset(user, user_params) |> Repo.update()
     end
   end
 end

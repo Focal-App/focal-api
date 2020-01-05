@@ -9,7 +9,7 @@ defmodule FocalApiWeb.SessionControllerTest do
   setup do
     mock(fn
       %{method: :get, url: "https://www.googleapis.com/userinfo/v2/me"} ->
-        %Tesla.Env{status: 200, body: %{id: "abcde"}}
+        %Tesla.Env{status: 200, body: %{"id" => "abcde"}}
     end)
 
     :ok

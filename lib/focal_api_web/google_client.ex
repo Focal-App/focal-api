@@ -1,7 +1,8 @@
 defmodule FocalApiWeb.GoogleClient do
   def get_user_id(client) do
     {:ok, response} = Tesla.get(client, "/userinfo/v2/me")
-    response.body.id
+    response.body["id"]
+  end
   end
 
   def client(token) do

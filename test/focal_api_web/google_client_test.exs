@@ -8,7 +8,7 @@ defmodule FocalApiWeb.GoogleClientTest do
 
     mock(fn
       %{method: :get, url: "https://www.googleapis.com/userinfo/v2/me"} ->
-        %Tesla.Env{status: 200, body: %{id: google_id}}
+        %Tesla.Env{status: 200, body: %{"id" => google_id}}
     end)
 
     token = "sadsadsad"
