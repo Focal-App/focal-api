@@ -64,10 +64,3 @@ defmodule FocalApiWeb.SessionController do
     end
   end
 end
-
-# TODO
-# Store access token + refresh token
-# Get offline access
-# Exchange refresh token for new access token to be stored in user session
-# If refresh token is revoked or invalid, get new refresh token
-# If an error occurs, the code checks for an HTTP 401 status code, which should be handled by redirecting the user to the authorization URL.

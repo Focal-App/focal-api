@@ -13,4 +13,12 @@ defmodule FocalApiWeb.ErrorView do
   def template_not_found(template, _assigns) do
     %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
   end
+
+  def render("external_api_error.json", %{errors: errors}) do
+    %{
+      errors: %{
+        message: errors["message"]
+      }
+    }
+  end
 end

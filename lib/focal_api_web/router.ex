@@ -46,7 +46,12 @@ defmodule FocalApiWeb.Router do
     get "/clients/:client_uuid/data", ClientController, :show_all_client_data
     get "/users/:user_uuid/clients", ClientController, :index_by_user
     get "/users/:user_uuid/clients/data", ClientController, :index_of_all_client_data_by_user
-    resources "/clients", ClientController, only: [:show, :create, :update, :delete], param: "client_uuid"
+
+    resources "/clients", ClientController,
+      only: [:show, :create, :update, :delete],
+      param: "client_uuid"
+
+    post "/email", EmailController, :create
 
     get "/users", UserController, :index
     resources "/users", UserController, only: [:show, :create], param: "user_uuid"

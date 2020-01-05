@@ -13,6 +13,13 @@ defmodule FocalApiWeb.FallbackController do
     |> render("error.json", changeset: changeset)
   end
 
+  def call(conn, {:error, :api_errors, errors}) do
+    conn
+    |> put_status(errors["code"])
+    |> put_view(FocalApiWeb.ErrorView)
+    |> render("external_api_error.json", errors: errors)
+  end
+
   def call(conn, {:error, :not_found}) do
     conn
     |> put_status(:not_found)

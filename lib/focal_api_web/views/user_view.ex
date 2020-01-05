@@ -11,10 +11,12 @@ defmodule FocalApiWeb.UserView do
   end
 
   def render("user.json", %{user: user}) do
-    %{avatar: user.avatar,
+    %{
+      avatar: user.avatar,
       email: user.email,
       first_name: user.first_name,
       provider: user.provider,
-      uuid: user.uuid}
+      uuid: user.uuid
+    }
   end
 end

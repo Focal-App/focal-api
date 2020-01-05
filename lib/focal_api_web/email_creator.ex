@@ -21,6 +21,13 @@ defmodule FocalApiWeb.EmailCreator do
     %{email_data | recipient: updated_recipient}
   end
 
+  def set_multiple_recipients(email_data, recipients) do
+    recipients
+    |> Enum.reduce(email_data, fn recipient, email_data ->
+      email_data |> set_receipient(recipient)
+    end)
+  end
+
   def set_content(email_data, content) do
     %{email_data | content: content}
   end
@@ -41,5 +48,25 @@ defmodule FocalApiWeb.EmailCreator do
     "#{mime_version}#{subject_line}#{sender_line}#{recipient_line}#{content_type_line}#{
       content_transfer_encoding_line
     }#{crlf}#{email_data.content}"
+  end
+
+  def gmail_generator(email_data) do
+    new()
+    |> set_sender(email_data.sender)
+    |> set_subject(email_data.subject)
+    |> set_content(email_data.content)
+    |> set_multiple_recipients(email_data.recipients)
+    |> generate
+    |> create_google_email
+  end
+
+  defp encode(email_string) do
+    Base.url_encode64(email_string)
+  end
+
+  defp create_google_email(email_string) do
+    %{
+      raw: encode(email_string)
+    }
   end
 end

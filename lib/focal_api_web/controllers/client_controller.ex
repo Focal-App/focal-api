@@ -9,8 +9,12 @@ defmodule FocalApiWeb.ClientController do
 
   action_fallback FocalApiWeb.FallbackController
 
-  plug FocalApiWeb.Plugs.AuthenticateSession when action in [:create, :update, :delete, :index_by_user, :show, :show_all_client_data]
-  plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID when action in [:update, :delete, :show, :show_all_client_data]
+  plug FocalApiWeb.Plugs.AuthenticateSession
+       when action in [:create, :update, :delete, :index_by_user, :show, :show_all_client_data]
+
+  plug FocalApiWeb.Plugs.AuthorizeUserByClientUUID
+       when action in [:update, :delete, :show, :show_all_client_data]
+
   plug FocalApiWeb.Plugs.AuthorizeUserByUserUUID when action in [:index_by_user]
 
   def index_by_user(conn, %{"user_uuid" => user_uuid}) do
@@ -26,14 +30,17 @@ defmodule FocalApiWeb.ClientController do
   def create(conn, params) do
     current_user = conn.assigns[:user]
 
-    create_client_attrs = params
-    |> Map.put("user_id", current_user.id)
-    |> Map.put_new("uuid", Ecto.UUID.generate)
+    create_client_attrs =
+      params
+      |> Map.put("user_id", current_user.id)
+      |> Map.put_new("uuid", Ecto.UUID.generate())
+
     {:ok, %Client{} = client} = Clients.create_client(create_client_attrs)
 
     with {:ok, _contact} <- handle_contact_update_or_create(params["contacts"], client) do
       with {:ok, _workflow} <- DefaultWorkflows.create_new_client_workflow_and_tasks(client) do
         client = Clients.get_client_by_uuid!(client.uuid)
+
         conn
         |> put_status(:created)
         |> put_resp_header("location", Routes.client_path(conn, :show, client))
@@ -57,8 +64,9 @@ defmodule FocalApiWeb.ClientController do
     client = Clients.get_client_by_uuid!(client_uuid) |> Repo.preload(:contacts)
 
     with {:ok, _contact} <- handle_contact_update_or_create(params["contacts"], client) do
-      update_client_attrs = params
-      |> Map.put("uuid", client_uuid)
+      update_client_attrs =
+        params
+        |> Map.put("uuid", client_uuid)
 
       with {:ok, %Client{} = client} <- Clients.update_client(client, update_client_attrs) do
         render(conn, "show_all_client_data.json", client: client)
@@ -79,7 +87,9 @@ defmodule FocalApiWeb.ClientController do
   defp handle_contact_update_or_create(contacts, client) do
     contacts
     |> Enum.map(fn contact ->
-      if (Map.has_key?(contact, "uuid")), do: update_contact(contact), else: create_contact(contact, client)
+      if Map.has_key?(contact, "uuid"),
+        do: update_contact(contact),
+        else: create_contact(contact, client)
     end)
     |> Enum.reduce(fn result, acc ->
       case result do
@@ -101,5 +111,4 @@ defmodule FocalApiWeb.ClientController do
     contact = Map.put(contact, "uuid", original_contact.uuid)
     Accounts.update_contact(original_contact, contact)
   end
-
 end
