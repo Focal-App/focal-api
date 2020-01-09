@@ -29,6 +29,11 @@ defmodule FocalApi.UsersTest do
       assert Users.get_template!(template.id) == template
     end
 
+    test "get_template_by_uuid!/1 returns the template with given uuid" do
+      template = template_fixture()
+      assert Users.get_template_by_uuid!(template.uuid) == template
+    end
+
     test "create_template/1 with valid data creates a template" do
       assert {:ok, %Template{} = template} = Users.create_template(@valid_attrs)
       assert template.template_category == "some template_category"

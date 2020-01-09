@@ -10,6 +10,7 @@ defmodule FocalApi.TestHelpers do
   alias FocalApi.Clients.Event
   alias FocalApi.Clients.Task
   alias FocalApi.Clients.Workflow
+  alias FocalApi.Users.Template
 
   def user_fixture(attrs \\ %{}) do
     params =
@@ -182,6 +183,24 @@ defmodule FocalApi.TestHelpers do
       |> Repo.insert()
 
       workflow
+  end
+
+  def template_fixture(attrs \\ %{}) do
+    user = user_fixture()
+
+    params =
+    attrs
+    |> Enum.into(%{
+      template_category: "new client",
+      template_content: "some template_content",
+      template_name: "new client inquiry",
+      uuid: Ecto.UUID.generate(),
+      user_id: user.id
+    })
+
+    {:ok, template} = Template.changeset(%Template{}, params) |> Repo.insert()
+
+    template
   end
 
   def valid_session(conn, user) do

@@ -50,6 +50,8 @@ defmodule FocalApiWeb.Router do
 
     get "/users", UserController, :index
     resources "/users", UserController, only: [:show, :create], param: "user_uuid"
+
+    resources "/templates", TemplateController, except: [:new, :edit], param: "template_uuid"
   end
 
   scope "/auth", FocalApiWeb do

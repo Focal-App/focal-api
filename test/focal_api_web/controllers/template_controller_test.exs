@@ -3,25 +3,19 @@ defmodule FocalApiWeb.TemplateControllerTest do
 
   alias FocalApi.Users
   alias FocalApi.Users.Template
+  alias FocalApi.TestHelpers
 
   @create_attrs %{
     template_category: "some template_category",
     template_content: "some template_content",
     template_name: "some template_name",
-    uuid: "7488a646-e31f-11e4-aace-600308960662"
   }
   @update_attrs %{
     template_category: "some updated template_category",
     template_content: "some updated template_content",
     template_name: "some updated template_name",
-    uuid: "7488a646-e31f-11e4-aace-600308960668"
   }
   @invalid_attrs %{template_category: nil, template_content: nil, template_name: nil, uuid: nil}
-
-  def fixture(:template) do
-    {:ok, template} = Users.create_template(@create_attrs)
-    template
-  end
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
@@ -35,66 +29,96 @@ defmodule FocalApiWeb.TemplateControllerTest do
   end
 
   describe "create template" do
-    test "renders template when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.template_path(conn, :create), template: @create_attrs)
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+    setup [:create_user]
 
-      conn = get(conn, Routes.template_path(conn, :show, id))
+    test "renders template when data is valid", %{conn: conn, user: user} do
+      conn = conn
+      |> TestHelpers.valid_session(user)
+      |> post(Routes.template_path(conn, :create), template: @create_attrs)
+
+      assert %{"uuid" => uuid} = json_response(conn, 201)["data"]
+
+      conn = get(conn, Routes.template_path(conn, :show, uuid))
 
       assert %{
-               "id" => id,
+               "user_uuid" => user_uuid,
+               "updated_at" => updated_at,
                "template_category" => "some template_category",
                "template_content" => "some template_content",
                "template_name" => "some template_name",
-               "uuid" => "7488a646-e31f-11e4-aace-600308960662"
+               "uuid" => uuid
              } = json_response(conn, 200)["data"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.template_path(conn, :create), template: @invalid_attrs)
+    test "renders errors when data is invalid", %{conn: conn, user: user} do
+      conn = conn
+      |> TestHelpers.valid_session(user)
+      |> post(Routes.template_path(conn, :create), template: @invalid_attrs)
+
       assert json_response(conn, 422)["errors"] != %{}
     end
+
+    test "renders error when user is not logged in", %{conn: conn, user: _user} do
+      conn = post(conn, Routes.template_path(conn, :create), template: @create_attrs)
+
+
+      assert json_response(conn, 401)["errors"] == %{"detail" => "Unauthorized"}
+    end
+
   end
 
   describe "update template" do
-    setup [:create_template]
+    setup [:create_template, :create_user]
 
-    test "renders template when data is valid", %{conn: conn, template: %Template{id: id} = template} do
-      conn = put(conn, Routes.template_path(conn, :update, template), template: @update_attrs)
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+    test "renders template when data is valid", %{conn: conn, template: %Template{uuid: uuid} = template, user: user} do
+      user_uuid = user.uuid
+      conn = conn
+      |> TestHelpers.valid_session(user)
+      |> put(Routes.template_path(conn, :update, uuid), template: @update_attrs)
 
-      conn = get(conn, Routes.template_path(conn, :show, id))
+      assert %{"uuid" => ^uuid} = json_response(conn, 200)["data"]
+
+      conn = get(conn, Routes.template_path(conn, :show, uuid))
 
       assert %{
-               "id" => id,
                "template_category" => "some updated template_category",
                "template_content" => "some updated template_content",
                "template_name" => "some updated template_name",
-               "uuid" => "7488a646-e31f-11e4-aace-600308960668"
+               "uuid" => user_uuid
              } = json_response(conn, 200)["data"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn, template: template} do
-      conn = put(conn, Routes.template_path(conn, :update, template), template: @invalid_attrs)
+    test "renders errors when data is invalid", %{conn: conn, template: template, user: user} do
+      conn = conn
+      |> TestHelpers.valid_session(user)
+      |> put(Routes.template_path(conn, :update, template.uuid), template: @invalid_attrs)
+
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
 
   describe "delete template" do
-    setup [:create_template]
+    setup [:create_template, :create_user]
 
-    test "deletes chosen template", %{conn: conn, template: template} do
-      conn = delete(conn, Routes.template_path(conn, :delete, template))
+    test "deletes chosen template", %{conn: conn, template: template, user: user} do
+      conn = conn
+      |> TestHelpers.valid_session(user)
+      |> delete(Routes.template_path(conn, :delete, template.uuid))
       assert response(conn, 204)
 
       assert_error_sent 404, fn ->
-        get(conn, Routes.template_path(conn, :show, template))
+        get(conn, Routes.template_path(conn, :show, template.uuid))
       end
     end
   end
 
   defp create_template(_) do
-    template = fixture(:template)
+    template = TestHelpers.template_fixture()
     {:ok, template: template}
+  end
+
+  defp create_user(_) do
+    user = TestHelpers.user_fixture()
+    {:ok, user: user}
   end
 end
